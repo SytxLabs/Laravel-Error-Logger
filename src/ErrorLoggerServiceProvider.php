@@ -13,6 +13,7 @@ class ErrorLoggerServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/error-logger.php' => config_path('error-logger.php'),
             ], 'error-logger-config');
+            $this->mergeConfigFrom(__DIR__ . '/../config/channels.php', 'logging.channels');
 
             AboutCommand::add('SytxLabs Error Log Package', static fn () => ['Version' => '1.0.0', 'Author' => 'SytxLabs']);
         }

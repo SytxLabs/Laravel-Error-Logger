@@ -12,7 +12,7 @@ composer require sytxlabs/error-logger
 
 You can publish the config file with:
 ```bash
-php artisan vendor:publish --provider="Sytxlabs\ErrorLogger\ErrorLoggerServiceProvider" --tag="config"
+php artisan vendor:publish --tag="error-logger-config"
 ```
 
 After publishing the config file, change the values in the config file to your desired values.
