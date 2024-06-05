@@ -46,7 +46,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         $email->priority($config->email_priority->getPriority());
 
         $mailHandler = new SymfonyMailerHandler(
-            $config->email_transport ?? Mail::getSymfonyTransport(),
+            $config->email_transport,
             $email,
             $level,
         );

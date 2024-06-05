@@ -2,6 +2,7 @@
 
 namespace SytxLabs\ErrorLogger\Support;
 
+use Illuminate\Support\Facades\Mail;
 use Monolog\Level;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
@@ -23,7 +24,7 @@ class Config
     public array $email_from;
     public array $email_reply_to;
     public ErrorLogEmailPriority $email_priority;
-    public ?TransportInterface $email_transport = null;
+    public TransportInterface $email_transport;
 
     public string $discord_webhook_url;
     public string $discord_username;
@@ -56,6 +57,7 @@ class Config
         $this->email_from = config('error-logger.email.from', []);
         $this->email_reply_to = config('error-logger.email.reply_to', []);
         $this->email_priority = ErrorLogEmailPriority::tryFrom(strtolower(config('error-logger.email.priority', 'normal'))) ?? ErrorLogEmailPriority::Normal;
+        $this->email_transport = Mail::getSymfonyTransport();
 
         $this->discord_webhook_url = config('error-logger.discord.webhook_url', '');
         $this->discord_username = config('error-logger.discord.default_username', 'Logger');
