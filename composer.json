@@ -3,6 +3,11 @@
     "description": "A Laravel package to log errors",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "error",
+        "logger"
+    ],
     "authors": [
         {
             "name": "Shaun Lüdeke",
