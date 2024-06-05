@@ -29,7 +29,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
     public function __construct(string $subject, bool $deduplicate, Level $level, Config $config)
     {
         $recipient = $config->email_to;
-        if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null) || empty($recipient[0]['address'] ?? null)) {
+        if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null)) {
             $this->handler = new NoopHandler();
             return;
         }
@@ -41,7 +41,11 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             }
             $email->addTo(new Address($to['address'], $to['name'] ?? ''));
         }
-        $email->replyTo($config->email_reply_to['address'] ?? '', $config->email_reply_to['name'] ?? '');
+        if (empty($email->getTo())) {
+            $this->handler = new NoopHandler();
+            return;
+        }
+        $email->replyTo(new Address($config->email_reply_to['address'] ?? '', $config->email_reply_to['name'] ?? ''));
         $email->subject($subject);
         $email->priority($config->email_priority->getPriority());
 
