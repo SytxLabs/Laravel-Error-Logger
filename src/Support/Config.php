@@ -2,9 +2,7 @@
 
 namespace SytxLabs\ErrorLogger\Support;
 
-use Illuminate\Support\Facades\Mail;
 use Monolog\Level;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
 use SytxLabs\ErrorLogger\Enums\ErrorLogType;
 

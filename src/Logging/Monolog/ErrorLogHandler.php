@@ -17,16 +17,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
-    private static ?Config $config;
 
-    public function __construct()
+    public function __construct(Config $config)
     {
-        $this->setConfig(self::$config ?? new Config());
-    }
-
-    public function setConfig(Config $config): void
-    {
-        self::$config = $config;
         $type = $config->type;
         if ($type === null) {
             throw new InvalidArgumentException('Invalid error log type');
