@@ -16,7 +16,6 @@ use Monolog\Handler\SymfonyMailerHandler;
 use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
-use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use SytxLabs\ErrorLogger\Support\Config;

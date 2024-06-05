@@ -71,4 +71,3 @@ class Config
         $this->telegram_chat_id = config('error-logger.telegram.chat_id', '');
     }
 }
-

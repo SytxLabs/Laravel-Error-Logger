@@ -26,7 +26,7 @@ class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
     {
         $name = storage_path($config->daily_file_path ?? 'logs/log_{timespan}.log');
         if (str_contains($name, '{timespan}')) {
-            $days = (int)($config->daily_file_days ?? 7);
+            $days = (int) ($config->daily_file_days ?? 7);
             $name = str_replace(
                 '{timespan}',
                 $days > 1 ?
