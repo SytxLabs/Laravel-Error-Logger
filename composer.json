@@ -23,12 +23,12 @@
     },
     "require": {
         "php": "^8.1|^8.2|^8.3",
-        "guzzlehttp/guzzle": "7.8",
-        "http-interop/http-factory-guzzle": "1.2",
+        "guzzlehttp/guzzle": "^7.8",
+        "http-interop/http-factory-guzzle": "^1.2",
         "illuminate/console": "^10.24",
         "illuminate/http": "^10.24",
         "illuminate/support": "^10.24",
-        "m4tthumphrey/php-gitlab-api": "11.14",
+        "m4tthumphrey/php-gitlab-api": "^11.14",
         "symfony/http-client": "^7.0"
     },
     "require-dev": {
