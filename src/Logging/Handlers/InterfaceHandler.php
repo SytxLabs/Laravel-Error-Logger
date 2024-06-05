@@ -13,7 +13,6 @@ use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
-use SytxLabs\ErrorLogger\Support\Config;
 
 class InterfaceHandler implements HandlerInterface, ProcessableHandlerInterface
 {
