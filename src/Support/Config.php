@@ -9,8 +9,12 @@ use SytxLabs\ErrorLogger\Enums\ErrorLogType;
 class Config
 {
     public ?ErrorLogType $type;
-    public bool $deduplicate;
     public Level $level;
+
+    public bool $deduplicate_enabled;
+    public int $deduplicate_interval;
+    public Level $deduplicate_level;
+    public ?string $deduplicate_log_path;
 
     public string $file_path;
 
@@ -42,8 +46,12 @@ class Config
     public function __construct()
     {
         $this->type = ErrorLogType::tryFrom(config('error-logger.type', 'file'));
-        $this->deduplicate = config('error-logger.deduplicate', false);
         $this->level = Level::fromName(config('error-logger.level', 'error'));
+
+        $this->deduplicate_enabled = config('error-logger.deduplicate.enabled', true);
+        $this->deduplicate_interval = config('error-logger.deduplicate.interval', 5);
+        $this->deduplicate_level = Level::fromName(config('error-logger.deduplicate.level', 'debug'));
+        $this->deduplicate_log_path = config('error-logger.deduplicate.log_path', storage_path('logs/deduplicate.log'));
 
         $this->file_path = config('error-logger.file.path', 'logs/laravel.log');
 

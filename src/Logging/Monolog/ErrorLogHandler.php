@@ -18,8 +18,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     private HandlerInterface $handler;
 
-    public function __construct(Config $config)
+    public function __construct(?Config $config = null)
     {
+        $config ??= new Config();
         $type = $config->type;
         if ($type === null) {
             throw new InvalidArgumentException('Invalid error log type');
@@ -34,7 +35,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             '{{APP_NAME}} [%datetime%] %channel%.%level_name%: %message%'
         );
         $this->handler = $type
-            ->getHandler($subject, config('error-logger.deduplicate', false), Logger::toMonologLevel($config->level), $config);
+            ->getHandler($subject, Logger::toMonologLevel($config->level), $config);
     }
 
     public function isHandling(LogRecord $record): bool

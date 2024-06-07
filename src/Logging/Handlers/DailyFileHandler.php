@@ -3,28 +3,25 @@
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use Illuminate\Support\Carbon;
-use Monolog\Handler\BufferHandler;
-use Monolog\Handler\DeduplicationHandler;
-use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
-use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
+use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
 use SytxLabs\ErrorLogger\Support\Config;
 
 class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
 {
+    use CorrectHandlerInterface;
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
 
-    public function __construct(bool $deduplicate, Level $level, Config $config)
+    public function __construct(Level $level, Config $config)
     {
-        $name = storage_path($config->daily_file_path ?? 'logs/log_{timespan}.log');
+        $name = $config->daily_file_path ?? storage_path('logs/log_{timespan}.log');
         if (str_contains($name, '{timespan}')) {
             $days = (int) ($config->daily_file_days ?? 7);
             $name = str_replace(
@@ -35,13 +32,7 @@ class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
                 $name
             );
         }
-        $bufferHandlerClass = $deduplicate ? DeduplicationHandler::class : BufferHandler::class;
-        $this->handler = new WhatFailureGroupHandler([
-            new $bufferHandlerClass(new FingersCrossedHandler(
-                new StreamHandler($name, $level),
-                new ErrorLevelActivationStrategy($level),
-            )),
-        ]);
+        $this->handler = $this->getCorrectHandler(new StreamHandler($name, $level), $level, $config);
     }
 
     public function isHandling(LogRecord $record): bool

@@ -28,18 +28,20 @@
     },
     "require": {
         "php": "^8.1|^8.2|^8.3",
+        "psr/log": "^3",
+        "monolog/monolog": "^3",
+        "illuminate/log": "^10|^11",
+        "illuminate/mail": "^10|^11",
+        "illuminate/support": "^10|^11",
+        "symfony/mailer": "^6|^7",
         "guzzlehttp/guzzle": "^7.8",
-        "http-interop/http-factory-guzzle": "^1.2",
-        "illuminate/console": "^10.24",
-        "illuminate/http": "^10.24",
-        "illuminate/support": "^10.24",
         "m4tthumphrey/php-gitlab-api": "^11.14",
         "symfony/http-client": "^7.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^8.15",
-        "phpunit/phpunit": "^10.4",
-        "portavice/laravel-pint-config": "2.0"
+        "orchestra/testbench": "^8.5|^9.1",
+        "phpunit/phpunit": "^10.4|^11.1",
+        "portavice/laravel-pint-config": "^2.0"
     },
     "config": {
         "sort-packages": true,

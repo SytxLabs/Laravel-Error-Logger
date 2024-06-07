@@ -2,8 +2,14 @@
 
 return [
     'type' => 'file', // file, daily_file, email, discord, whatsapp, github, gitlab, telegram
-    'deduplicate' => true,
     'level' => 'error', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+
+    'deduplicate' => [
+        'enabled' => true,
+        'interval' => 5, // in minutes
+        'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+        'log_path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
+    ],
 
     'file' => [
         'path' => storage_path('logs/log.log'),

@@ -26,17 +26,17 @@ enum ErrorLogType: string
     case GitLab = 'gitlab';
     case Telegram = 'telegram';
 
-    public function getHandler(string $subject, bool $deduplicate, Level $level, Config $config): HandlerInterface
+    public function getHandler(string $subject, Level $level, Config $config): HandlerInterface
     {
         return match ($this) {
-            self::File => new InterfaceHandler(new StreamHandler(storage_path($config->file_path), $level), $deduplicate, $level),
-            self::DailyFile => new DailyFileHandler($deduplicate, $level, $config),
-            self::Email => new EmailHandler($subject, $deduplicate, $level, $config),
-            self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level, $config), $deduplicate, $level),
-            self::WhatsApp => new InterfaceHandler(new WhatsappProcessingHandler($level, $config), $deduplicate, $level),
-            self::GitHub => new InterfaceHandler(new GithubProcessingHandler($level, $config), $deduplicate, $level),
-            self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level, $config), $deduplicate, $level),
-            self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level, $config), $deduplicate, $level),
+            self::File => new InterfaceHandler(new StreamHandler($config->file_path, $level), $level, $config),
+            self::DailyFile => new DailyFileHandler($level, $config),
+            self::Email => new EmailHandler($subject, $level, $config),
+            self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level, $config), $level, $config),
+            self::WhatsApp => new InterfaceHandler(new WhatsappProcessingHandler($level, $config), $level, $config),
+            self::GitHub => new InterfaceHandler(new GithubProcessingHandler($level, $config), $level, $config),
+            self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level, $config), $level, $config),
+            self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level, $config), $level, $config),
         };
     }
 }

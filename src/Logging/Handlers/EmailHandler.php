@@ -4,29 +4,26 @@ namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use Illuminate\Support\Facades\Mail;
 use Monolog\Formatter\HtmlFormatter;
-use Monolog\Handler\BufferHandler;
-use Monolog\Handler\DeduplicationHandler;
-use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
-use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\NoopHandler;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Handler\SymfonyMailerHandler;
-use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
 use SytxLabs\ErrorLogger\Support\Config;
 
 class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
 {
+    use CorrectHandlerInterface;
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
 
-    public function __construct(string $subject, bool $deduplicate, Level $level, Config $config)
+    public function __construct(string $subject, Level $level, Config $config)
     {
         $recipient = $config->email_to;
         if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null)) {
@@ -50,20 +47,12 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         $email->priority($config->email_priority->getPriority());
 
         $mailHandler = new SymfonyMailerHandler(
-            $config->email_transport ?? Mail::getFacadeRoot()->getSwiftMailer()->getTransport(),
+            $config->email_transport ?? Mail::driver(\config('mail.default'))->getSymfonyTransport(),
             $email,
             $level,
         );
-
         $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
-
-        $bufferHandlerClass = $deduplicate ? DeduplicationHandler::class : BufferHandler::class;
-        $this->handler = new WhatFailureGroupHandler([
-            new $bufferHandlerClass(new FingersCrossedHandler(
-                $mailHandler,
-                new ErrorLevelActivationStrategy($level), // Buffer all until configured level is reached.
-            )),
-        ]);
+        $this->handler = $this->getCorrectHandler($mailHandler, $level, $config);
     }
 
     public function isHandling(LogRecord $record): bool
