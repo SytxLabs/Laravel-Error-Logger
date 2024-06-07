@@ -1,23 +1,81 @@
-# Error-Logger
+# Error-Logger for Laravel
 
-This is a error logger for laravel. It logs the errors and sends an email to the admin.
+[![MIT Licensed](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Run tests](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/tests.yml/badge.svg?style=flat-square)](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/tests.yml)
+[![Check code style](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/code-style.yml/badge.svg?style=flat-square)](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/code-style.yml)
+[![Latest Version on Packagist](https://poser.pugx.org/sytxlabs/laravel-error-logger/v/stable?format=flat-square)](https://packagist.org/packages/sytxlabs/laravel-error-logger)
+[![Total Downloads](https://poser.pugx.org/sytxlabs/laravel-error-logger/downloads?format=flat-square)](https://packagist.org/packages/sytxlabs/laravel-error-logger)
+
+
+This package adds a basic logging channel that sends error logs to an email address, discord channel, whatsapp account, telegram chat and a (github/gitlab) issue.
+
+## Prerequisites
+
+* A configured default Laravel mail driver
+* PHP 8.2 or higher
+* Laravel 10.0 or higher
 
 ## Installation
 
-You can install the package via composer:
-
-```bash
-composer require sytxlabs/error-logger
+```sh
+composer require sytxlabs/laravel-error-logger
 ```
 
-You can publish the config file with:
-```bash
-php artisan vendor:publish --tag="error-logger-config"
+## Configuration
+
+To configure your Laravel application to use the logger, you should create a logging channel in your `logging.php`
+configuration file.
+
+For example a stack channel that logs to the default stack and sends email notifications:
+
+```php
+return [
+    // ...
+    'channels' => [
+        // ...    
+
+        'error-log' => [
+            'driver' => 'monolog',
+            'handler' => \SytxLabs\ErrorLogger\Logging\Monolog\ErrorLogHandler::class,
+        ],
+    ],
+    // ...    
+];
 ```
 
-After publishing the config file, change the values in the config file to your desired values.
-And also add the following to your .env file
+You may then set the logging channel in your `.env` file or as the default logging channel in your `logging.php`.
 
-```bash
-LOG_CHANNEL=error-logger
+```dotenv
+LOG_CHANNEL=error-log
 ```
+
+### Customization
+
+The library offers some customization for the default `error-log` channel via a config.
+
+It's also possible to publish the configuration for this package with the `artisan vendor:publish` command.
+
+```sh
+php artisan vendor:publish --tag=error-logger-config
+```
+
+### Choosing the Mail Transport
+
+By default, the application uses the default mail driver of your Laravel application.
+
+To change the mail driver, when changing in the `SytxLabs\ErrorLogger\Support\Config` class, you can set the `email_transport` config value.
+    
+```php
+$config->email_transport = Mail::driver('<Driver>')->getSymfonyTransport();
+```
+
+## Known issues
+
+### Mail drivers using a 'log' transport
+
+Mail drivers using a `\Illuminate\Mail\Transport\LogTransport` transport are not supported and the EmailHandler will
+fall back to a `NoopHandler`.
+
+**However**, this automatic fallback currently only works if the selected driver directly uses a `LogTransport`.
+If you for example set a `RoundRobinTransport` with a `LogTransport` mail driver, it will end up in
+an infinite recursion loop. 

@@ -30,6 +30,10 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             $this->handler = new NoopHandler();
             return;
         }
+        if ($config->email_transport === null && \config('mail.default', 'log') === 'log') {
+            $this->handler = new NoopHandler();
+            return;
+        }
         $email = new Email();
         $email->from(new Address($config->email_from['address'] ?? '', $config->email_from['name'] ?? ''));
         foreach ($recipient as $to) {

@@ -1,12 +1,19 @@
 {
-    "name": "sytxlabs/error-logger",
+    "name": "sytxlabs/laravel-error-logger",
     "description": "A Laravel package to log errors",
     "type": "library",
     "license": "MIT",
     "keywords": [
         "laravel",
         "error",
-        "logger"
+        "logger",
+        "log",
+        "email",
+        "gitlab",
+        "github",
+        "discord",
+        "whatsapp",
+        "telegram"
     ],
     "authors": [
         {
