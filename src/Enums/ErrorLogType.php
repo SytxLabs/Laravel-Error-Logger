@@ -13,7 +13,6 @@ use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\GithubProcessingHand
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\GitlabProcessingHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\TelegramProcessingHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\WhatsappProcessingHandler;
-use SytxLabs\ErrorLogger\Support\Config;
 
 enum ErrorLogType: string
 {
@@ -26,17 +25,17 @@ enum ErrorLogType: string
     case GitLab = 'gitlab';
     case Telegram = 'telegram';
 
-    public function getHandler(string $subject, Level $level, Config $config): HandlerInterface
+    public function getHandler(string $subject, Level $level): HandlerInterface
     {
         return match ($this) {
-            self::File => new InterfaceHandler(new StreamHandler($config->file_path, $level), $level, $config),
-            self::DailyFile => new DailyFileHandler($level, $config),
-            self::Email => new EmailHandler($subject, $level, $config),
-            self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level, $config), $level, $config),
-            self::WhatsApp => new InterfaceHandler(new WhatsappProcessingHandler($level, $config), $level, $config),
-            self::GitHub => new InterfaceHandler(new GithubProcessingHandler($level, $config), $level, $config),
-            self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level, $config), $level, $config),
-            self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level, $config), $level, $config),
+            self::File => new InterfaceHandler(new StreamHandler(config('error-logger.file.path'), $level), $level),
+            self::DailyFile => new DailyFileHandler($level),
+            self::Email => new EmailHandler($subject, $level),
+            self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level), $level),
+            self::WhatsApp => new InterfaceHandler(new WhatsappProcessingHandler($level), $level),
+            self::GitHub => new InterfaceHandler(new GithubProcessingHandler($level), $level),
+            self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level), $level),
+            self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level), $level),
         };
     }
 }

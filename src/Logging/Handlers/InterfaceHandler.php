@@ -9,7 +9,6 @@ use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Level;
 use Monolog\LogRecord;
 use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
-use SytxLabs\ErrorLogger\Support\Config;
 
 class InterfaceHandler implements HandlerInterface, ProcessableHandlerInterface
 {
@@ -18,9 +17,9 @@ class InterfaceHandler implements HandlerInterface, ProcessableHandlerInterface
 
     private HandlerInterface $handler;
 
-    public function __construct(AbstractProcessingHandler $class, Level $level, Config $config)
+    public function __construct(AbstractProcessingHandler $class, Level $level)
     {
-        $this->handler = $this->getCorrectHandler($class, $level, $config);
+        $this->handler = $this->getCorrectHandler($class, $level);
     }
 
     public function isHandling(LogRecord $record): bool

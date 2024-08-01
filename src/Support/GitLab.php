@@ -6,11 +6,11 @@ use Exception;
 use Gitlab\Client;
 use RuntimeException;
 
-class GitLab
+readonly class GitLab
 {
-    private readonly string $url;
-    private readonly string $token;
-    private readonly string $project;
+    private string $url;
+    private string $token;
+    private string $project;
 
     /**
      * @param  string  ...$args [0] = url, [1] = token or [0] = url, [1] = project, [2] = token or [0] = url

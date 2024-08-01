@@ -9,7 +9,6 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\DiscordFormatter;
-use SytxLabs\ErrorLogger\Support\Config;
 use SytxLabs\ErrorLogger\Support\DiscordWebhook;
 use UnexpectedValueException;
 
@@ -18,19 +17,17 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
     protected string|null $url = null;
     protected ?DiscordWebhook $discordWebhook = null;
     private string|null $errorMessage = null;
-    private Config $config;
 
-    public function __construct(int|Level|string $level, Config $config, bool $bubble = true)
+    public function __construct(int|Level|string $level, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
-        $url = $config->discord_webhook_url ?? '';
+        $url = config('error-logger.discord.webhook_url', '');
         if (trim($url) !== '') {
             $this->url = $url;
         } else {
             throw new InvalidArgumentException('Discord Webhook URL is not set.');
         }
         $this->discordWebhook = new DiscordWebhook($this->url);
-        $this->config = $config;
     }
 
     /**
@@ -52,10 +49,10 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
         $discordWebhook = $this->discordWebhook = new DiscordWebhook($this->url);
-        if (($avatar = $this->config->discord_avatar_url ?? '') !== '') {
+        if (($avatar = config('error-logger.discord.avatar_url', '')) !== '') {
             $this->discordWebhook->setAvatar($avatar);
         }
-        $this->discordWebhook->setUsername(config('app.name', 'Laravel') . ' Log');
+        $this->discordWebhook->setUsername(config('error-logger.discord.username', config('app.name', '')) . ' Log');
         $this->discordWebhook->setColor(match ($record->level) {
             Level::Emergency, Level::Error, Level::Critical, Level::Alert => '#dc3545',
             Level::Warning => '#ffc107',

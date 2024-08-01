@@ -5,11 +5,11 @@ namespace SytxLabs\ErrorLogger\Support;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
-class WhatsAppCallMeBot
+readonly class WhatsAppCallMeBot
 {
     private const ApiUrl = 'https://api.callmebot.com/whatsapp.php?source=php&phone={phone}&text={text}&apikey={apikey}';
 
-    public function __construct(private readonly string $apiKey, private readonly string $phoneNumber)
+    public function __construct(private string $apiKey, private string $phoneNumber)
     {
     }
 

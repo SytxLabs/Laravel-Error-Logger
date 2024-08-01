@@ -9,7 +9,6 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
-use SytxLabs\ErrorLogger\Support\Config;
 use SytxLabs\ErrorLogger\Support\GitLab;
 use UnexpectedValueException;
 
@@ -20,11 +19,11 @@ class GitlabProcessingHandler extends AbstractProcessingHandler
     protected ?GitLab $gitLab = null;
     private string|null $errorMessage = null;
 
-    public function __construct(int|Level|string $level, Config $config, bool $bubble = true)
+    public function __construct(int|Level|string $level, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
-        $url = $config->gitlab_url ?? '';
-        $apiKey = $config->gitlab_token ?? '';
+        $url = config('error-logger.gitlab.url', '');
+        $apiKey = config('error-logger.gitlab.token', '');
         if (trim($url) !== '' && trim($apiKey) !== '') {
             $this->url = $url;
             $this->apiKey = $apiKey;

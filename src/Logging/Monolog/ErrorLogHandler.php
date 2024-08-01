@@ -6,23 +6,26 @@ use InvalidArgumentException;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
+use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
 use Psr\Log\AbstractLogger;
 use Stringable;
-use SytxLabs\ErrorLogger\Support\Config;
+use SytxLabs\ErrorLogger\Enums\ErrorLogType;
 
 class ErrorLogHandler extends AbstractLogger implements HandlerInterface, ProcessableHandlerInterface
 {
     use ProcessableHandlerTrait;
 
-    private HandlerInterface $handler;
+    /**
+     * @var HandlerInterface[] $handlers
+     */
+    private array $handlers;
 
-    public function __construct(?Config $config = null)
+    public function __construct()
     {
-        $config ??= new Config();
-        $type = $config->type;
-        if ($type === null) {
+        $types = config('error-logger.types');
+        if ($types === null) {
             throw new InvalidArgumentException('Invalid error log type');
         }
         $replacements = collect([
@@ -34,13 +37,31 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             $replacements->values()->all(),
             '{{APP_NAME}} [%datetime%] %channel%.%level_name%: %message%'
         );
-        $this->handler = $type
-            ->getHandler($subject, Logger::toMonologLevel($config->level), $config);
+        if (!is_array($types)) {
+            $types = [$types];
+        }
+        $this->handlers = [];
+        foreach ($types as $type) {
+            $type = ErrorLogType::tryFrom($type);
+            if ($type === null) {
+                continue;
+            }
+            $this->handlers[] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName(config('error-logger.level'))));
+        }
+        if (count($this->handlers) === 0) {
+            throw new InvalidArgumentException('No valid error log types');
+        }
     }
 
     public function isHandling(LogRecord $record): bool
     {
-        return $this->handler->isHandling($record);
+        $handled = false;
+        foreach ($this->handlers as $handler) {
+            if ($handler->isHandling($record)) {
+                $handled = true;
+            }
+        }
+        return $handled;
     }
 
     public function handle(LogRecord $record): bool
@@ -48,18 +69,28 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         if (count($this->processors) > 0) {
             $record = $this->processRecord($record);
         }
-
-        return $this->handler->handle($record);
+        $result = false;
+        foreach ($this->handlers as $handler) {
+            if ($handler->handle($record)) {
+                $result = true;
+            }
+        }
+        return $result;
     }
 
     public function handleBatch(array $records): void
     {
-        $this->handler->handleBatch($records);
+        foreach ($this->handlers as $handler) {
+            $handler->handleBatch($records);
+        }
     }
 
     public function close(): void
     {
-        $this->handler->close();
+        foreach ($this->handlers as $handler) {
+            $handler->close();
+        }
+        unset($this->handlers);
     }
 
     public function log($level, string|Stringable $message, array $context = [], array $extra = [], mixed $formatted = null): void

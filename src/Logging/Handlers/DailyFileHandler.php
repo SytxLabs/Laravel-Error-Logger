@@ -10,7 +10,6 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
-use SytxLabs\ErrorLogger\Support\Config;
 
 class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
 {
@@ -19,11 +18,11 @@ class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
 
     private HandlerInterface $handler;
 
-    public function __construct(Level $level, Config $config)
+    public function __construct(Level $level)
     {
-        $name = $config->daily_file_path ?? storage_path('logs/log_{timespan}.log');
+        $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));
         if (str_contains($name, '{timespan}')) {
-            $days = (int) ($config->daily_file_days ?? 7);
+            $days = config('error-logger.daily_file.days', 7);
             $name = str_replace(
                 '{timespan}',
                 $days > 1 ?
@@ -32,7 +31,7 @@ class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
                 $name
             );
         }
-        $this->handler = $this->getCorrectHandler(new StreamHandler($name, $level), $level, $config);
+        $this->handler = $this->getCorrectHandler(new StreamHandler($name, $level), $level);
     }
 
     public function isHandling(LogRecord $record): bool

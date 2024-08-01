@@ -7,11 +7,11 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-class Github
+readonly class Github
 {
-    private readonly string $owner;
-    private readonly string $repo;
-    private readonly string $token;
+    private string $owner;
+    private string $repo;
+    private string $token;
 
     /**
      * @param  string  ...$args  [0] = url, [1] = token or [0] = owner, [1] = repo, [2] = token

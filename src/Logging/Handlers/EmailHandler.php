@@ -2,6 +2,8 @@
 
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
+use function config;
+
 use Illuminate\Support\Facades\Mail;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\HandlerInterface;
@@ -13,8 +15,8 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
 use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
-use SytxLabs\ErrorLogger\Support\Config;
 
 class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
 {
@@ -23,19 +25,19 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
 
     private HandlerInterface $handler;
 
-    public function __construct(string $subject, Level $level, Config $config)
+    public function __construct(string $subject, Level $level)
     {
-        $recipient = $config->email_to;
+        $recipient = config('error-logger.email.to', []);
         if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null)) {
             $this->handler = new NoopHandler();
             return;
         }
-        if ($config->email_transport === null && \config('mail.default', 'log') === 'log') {
+        if (config('error-logger.email.drive', 'log') === 'log' || (config('error-logger.email.drive') === null && config('mail.default', 'log') === 'log')) {
             $this->handler = new NoopHandler();
             return;
         }
         $email = new Email();
-        $email->from(new Address($config->email_from['address'] ?? '', $config->email_from['name'] ?? ''));
+        $email->from(new Address(config('error-logger.email.from.address', ''), config('error-logger.email.from.name', '')));
         foreach ($recipient as $to) {
             if (!is_array($to) || !array_key_exists('address', $to)) {
                 continue;
@@ -46,17 +48,19 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             $this->handler = new NoopHandler();
             return;
         }
-        $email->replyTo(new Address($config->email_reply_to['address'] ?? '', $config->email_reply_to['name'] ?? ''));
+        if (config('error-logger.email.reply_to.address', '') !== '') {
+            $email->replyTo(new Address(config('error-logger.email.reply_to.address', ''), config('error-logger.email.reply_to.name', '')));
+        }
         $email->subject($subject);
-        $email->priority($config->email_priority->getPriority());
+        $email->priority((ErrorLogEmailPriority::tryFrom(config('error-logger.email.priority', ErrorLogEmailPriority::Normal->value)) ?? ErrorLogEmailPriority::Normal)->getPriority());
 
         $mailHandler = new SymfonyMailerHandler(
-            $config->email_transport ?? Mail::driver(\config('mail.default'))->getSymfonyTransport(),
+            Mail::driver(config('error-logger.email.drive', config('mail.default', 'log')))->getSymfonyTransport(),
             $email,
             $level,
         );
         $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
-        $this->handler = $this->getCorrectHandler($mailHandler, $level, $config);
+        $this->handler = $this->getCorrectHandler($mailHandler, $level);
     }
 
     public function isHandling(LogRecord $record): bool

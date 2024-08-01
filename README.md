@@ -1,7 +1,6 @@
 # Error-Logger for Laravel
 
 [![MIT Licensed](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Run tests](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/tests.yml/badge.svg?style=flat-square)](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/tests.yml)
 [![Check code style](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/code-style.yml/badge.svg?style=flat-square)](https://github.com/SytxLabs/Laravel-Error-Logger/actions/workflows/code-style.yml)
 [![Latest Version on Packagist](https://poser.pugx.org/sytxlabs/laravel-error-logger/v/stable?format=flat-square)](https://packagist.org/packages/sytxlabs/laravel-error-logger)
 [![Total Downloads](https://poser.pugx.org/sytxlabs/laravel-error-logger/downloads?format=flat-square)](https://packagist.org/packages/sytxlabs/laravel-error-logger)

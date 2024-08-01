@@ -5,9 +5,9 @@ namespace SytxLabs\ErrorLogger\Support;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
-class Telegram
+readonly class Telegram
 {
-    public function __construct(private readonly string $token, private readonly string $chatId)
+    public function __construct(private string $token, private string $chatId)
     {
     }
 

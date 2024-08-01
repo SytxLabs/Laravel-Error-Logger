@@ -8,7 +8,6 @@ use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
-use SytxLabs\ErrorLogger\Support\Config;
 use SytxLabs\ErrorLogger\Support\Telegram;
 use UnexpectedValueException;
 
@@ -19,11 +18,11 @@ class TelegramProcessingHandler extends AbstractProcessingHandler
     protected ?Telegram $telegram = null;
     private string|null $errorMessage = null;
 
-    public function __construct(int|Level|string $level, Config $config, bool $bubble = true)
+    public function __construct(int|Level|string $level, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
-        $chatId = $config->telegram_chat_id ?? '';
-        $apiToken = $config->telegram_api_token ?? '';
+        $chatId = config('error-logger.telegram.chat_id', '');
+        $apiToken = config('error-logger.telegram.token', '');
         if (trim($chatId) !== '' && trim($apiToken) !== '') {
             $this->chatId = $chatId;
             $this->apiToken = $apiToken;

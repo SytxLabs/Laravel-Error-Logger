@@ -9,7 +9,6 @@ use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
-use SytxLabs\ErrorLogger\Support\Config;
 use SytxLabs\ErrorLogger\Support\WhatsAppCallMeBot;
 use UnexpectedValueException;
 
@@ -18,11 +17,11 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
     protected ?Collection $whatsAppCallMeBots = null;
     private string|null $errorMessage = null;
 
-    public function __construct(int|Level|string $level, Config $config, bool $bubble = true)
+    public function __construct(int|Level|string $level, bool $bubble = true)
     {
         $this->whatsAppCallMeBots = new Collection();
         parent::__construct($level, $bubble);
-        foreach (($config->whatsapp ?? []) as $whatsApp) {
+        foreach (config('error-logger.whatsapp', []) as $whatsApp) {
             $phoneNumber = $whatsApp['phone_number'] ?? '';
             $apiToken = $whatsApp['api_token'] ?? '';
             if (trim($phoneNumber) !== '' && trim($apiToken) !== '') {

@@ -8,18 +8,17 @@ use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
-use SytxLabs\ErrorLogger\Support\Config;
 
 trait CorrectHandlerInterface
 {
-    private function getCorrectHandler(HandlerInterface $handler, Level $level, Config $config): HandlerInterface
+    private function getCorrectHandler(HandlerInterface $handler, Level $level): HandlerInterface
     {
-        if ($config->deduplicate_enabled) {
+        if (config('error-logger.deduplicate.enabled', false)) {
             $handler = new DeduplicationHandler(
                 $handler,
-                (app()->runningUnitTests() ? __DIR__ . '/../../../../tests/deduplicate.log' : $config->deduplicate_log_path),
-                $config->deduplicate_level,
-                $config->deduplicate_interval,
+                (app()->runningUnitTests() ? __DIR__ . '/../../../../tests/deduplicate.log' : config('error-logger.deduplicate.path', storage_path('logs/deduplicate.log'))),
+                config('error-logger.deduplicate.level', 'debug'),
+                config('error-logger.deduplicate.interval', 5),
             );
         }
         return new WhatFailureGroupHandler([

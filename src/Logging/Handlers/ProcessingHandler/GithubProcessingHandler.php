@@ -9,7 +9,6 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
-use SytxLabs\ErrorLogger\Support\Config;
 use SytxLabs\ErrorLogger\Support\Github;
 use UnexpectedValueException;
 
@@ -20,11 +19,11 @@ class GithubProcessingHandler extends AbstractProcessingHandler
     protected ?Github $github = null;
     private string|null $errorMessage = null;
 
-    public function __construct(int|Level|string $level, Config $config, bool $bubble = true)
+    public function __construct(int|Level|string $level, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
-        $url = $config->github_url ?? '';
-        $apiKey = $config->github_token ?? '';
+        $url = config('error-logger.github.url', '');
+        $apiKey = config('error-logger.github.token', '');
         if (trim($url) !== '') {
             $this->url = $url;
             $this->apiKey = $apiKey ?? '';
