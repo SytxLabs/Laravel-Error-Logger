@@ -58,16 +58,6 @@ It's also possible to publish the configuration for this package with the `artis
 php artisan vendor:publish --tag=error-logger-config
 ```
 
-### Choosing the Mail Transport
-
-By default, the application uses the default mail driver of your Laravel application.
-
-To change the mail driver, when changing in the `SytxLabs\ErrorLogger\Support\Config` class, you can set the `email_transport` config value.
-    
-```php
-$config->email_transport = Mail::driver('<Driver>')->getSymfonyTransport();
-```
-
 ## Known issues
 
 ### Mail drivers using a 'log' transport
