@@ -42,7 +42,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         $this->handlers = [];
         foreach ($types as $type) {
-            $type = ErrorLogType::tryFrom($type);
+            if (!($type instanceof ErrorLogType)) {
+                $type = ErrorLogType::tryFrom($type);
+            }
             if ($type === null) {
                 continue;
             }
@@ -95,8 +97,13 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function log($level, string|Stringable $message, array $context = [], array $extra = [], mixed $formatted = null): void
     {
-        $this->handler->handle(
-            new LogRecord(now()->toDateTimeImmutable(), 'error-logger', $level, $message, $context, $extra, $formatted)
-        );
+        if (!is_string($message) && !($message instanceof Stringable)) {
+            throw new InvalidArgumentException('Invalid message');
+        }
+        foreach ($this->handlers as $handler) {
+            $handler->handle(
+                new LogRecord(now()->toDateTimeImmutable(), 'error-logger', $level, $message, $context, $extra, $formatted)
+            );
+        }
     }
 }
