@@ -119,7 +119,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function deduplicateAdd(LogRecord $record): void
     {
-        if (!config('error-logger.deduplication.enabled', false)) {
+        if (!config('error-logger.deduplicate.enabled', false)) {
             return;
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
@@ -142,7 +142,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function isDuplicate(LogRecord $record): bool
     {
-        if (!config('error-logger.deduplication.enabled', false)) {
+        if (!config('error-logger.deduplicate.enabled', false)) {
             return false;
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
@@ -154,6 +154,8 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         $timestampValidity = $record->datetime->getTimestamp() - config('error-logger.deduplicate.interval', 60);
         $expectedMessage = preg_replace('{[\r\n].*}', '', $record->message);
         $yesterday = time() - 86400;
+        
+        $collect = false;
 
         foreach ($store as $log) {
             [$timestamp, $level, $message] = explode(':', $log, 3);
@@ -163,15 +165,18 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             }
 
             if ($timestamp < $yesterday) {
-                $this->deduplicateCollect();
+                $collect = true;
             }
+        }
+        if ($collect) {
+            $this->deduplicateCollect();
         }
         return false;
     }
 
     public function deduplicateCollect(): void
     {
-        if (!config('error-logger.deduplication.enabled', false)) {
+        if (!config('error-logger.deduplicate.enabled', false)) {
             return;
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
