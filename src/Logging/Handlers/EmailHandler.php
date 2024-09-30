@@ -39,6 +39,8 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         $email = new Email();
         if (trim(config('error-logger.email.from.address', '')) !== '') {
             $email->from(new Address(config('error-logger.email.from.address', ''), config('error-logger.email.from.name', '')));
+        } else {
+            $email->from(new Address(config('mail.from.address', ''), config('mail.from.name', '')));
         }
         foreach ($recipient as $to) {
             if (!is_array($to) || !array_key_exists('address', $to)) {
