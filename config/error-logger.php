@@ -8,7 +8,7 @@ return [
         'enabled' => true,
         'interval' => 60, // in seconds
         'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
-        'path' => 'logs/deduplicate.log', // path to store deduplicate log can be null for no log
+        'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
     ],
 
     'file' => [

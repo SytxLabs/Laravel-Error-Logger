@@ -124,6 +124,10 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
         if (!file_exists($path)) {
+            $dir = dirname($path);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
             touch($path);
         }
         $handle = fopen($path, 'a');
@@ -172,7 +176,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
         if (!file_exists($path)) {
-            touch($path);
+            return;
         }
         $handle = fopen($path, 'rw+');
         if ($handle === false) {
