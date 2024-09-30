@@ -37,7 +37,9 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             return;
         }
         $email = new Email();
-        $email->from(new Address(config('error-logger.email.from.address', ''), config('error-logger.email.from.name', '')));
+        if (trim(config('error-logger.email.from.address', '')) !== '') {
+            $email->from(new Address(config('error-logger.email.from.address', ''), config('error-logger.email.from.name', '')));
+        }
         foreach ($recipient as $to) {
             if (!is_array($to) || !array_key_exists('address', $to)) {
                 continue;
@@ -53,9 +55,16 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         }
         $email->subject($subject);
         $email->priority((ErrorLogEmailPriority::tryFrom(config('error-logger.email.priority', ErrorLogEmailPriority::Normal->value)) ?? ErrorLogEmailPriority::Normal)->getPriority());
-
+        $driver = config('error-logger.email.drive');
+        if ($driver === null) {
+            $driver = config('mail.default', 'log');
+        }
+        if ($driver === 'log') {
+            $this->handler = new NoopHandler();
+            return;
+        }
         $mailHandler = new SymfonyMailerHandler(
-            Mail::driver(config('error-logger.email.drive', config('mail.default', 'log')))->getSymfonyTransport(),
+            Mail::driver($driver)->getSymfonyTransport(),
             $email,
             $level,
         );
