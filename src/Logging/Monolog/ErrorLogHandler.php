@@ -80,6 +80,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
                 $result = true;
             }
         }
+        $result = $result || $this->isHandling($record);
         if ($result) {
             $this->deduplicateAdd($record);
         }
@@ -134,9 +135,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         if ($handle === false) {
             throw new \RuntimeException('Failed to open file for writing: ' . $path);
         }
-        flock($handle, LOCK_EX);
         fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
-        flock($handle, LOCK_UN);
         fclose($handle);
     }
 
@@ -154,7 +153,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         $timestampValidity = $record->datetime->getTimestamp() - config('error-logger.deduplicate.interval', 60);
         $expectedMessage = preg_replace('{[\r\n].*}', '', $record->message);
         $yesterday = time() - 86400;
-        
+
         $collect = false;
 
         foreach ($store as $log) {
