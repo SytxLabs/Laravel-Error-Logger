@@ -2,25 +2,24 @@
 
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
-use function config;
-
 use Illuminate\Support\Facades\Mail;
 use Monolog\Formatter\HtmlFormatter;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\NoopHandler;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Handler\SymfonyMailerHandler;
+use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
-use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
 
 class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
 {
-    use CorrectHandlerInterface;
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
@@ -71,7 +70,12 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             $level,
         );
         $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
-        $this->handler = $this->getCorrectHandler($mailHandler, $level);
+        $this->handler = new WhatFailureGroupHandler([
+            new FingersCrossedHandler(
+                $mailHandler,
+                new ErrorLevelActivationStrategy($level),
+            ),
+        ]);
     }
 
     public function isHandling(LogRecord $record): bool

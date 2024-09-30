@@ -3,23 +3,29 @@
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
+use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
-use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
 
 class InterfaceHandler implements HandlerInterface, ProcessableHandlerInterface
 {
-    use CorrectHandlerInterface;
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
 
     public function __construct(AbstractProcessingHandler $class, Level $level)
     {
-        $this->handler = $this->getCorrectHandler($class, $level);
+        $this->handler = new WhatFailureGroupHandler([
+            new FingersCrossedHandler(
+                $class,
+                new ErrorLevelActivationStrategy($level),
+            ),
+        ]);
     }
 
     public function isHandling(LogRecord $record): bool

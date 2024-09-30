@@ -3,17 +3,18 @@
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use Illuminate\Support\Carbon;
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
 use Monolog\Handler\StreamHandler;
+use Monolog\Handler\WhatFailureGroupHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
-use SytxLabs\ErrorLogger\Logging\Handlers\Traits\CorrectHandlerInterface;
 
 class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
 {
-    use CorrectHandlerInterface;
     use ProcessableHandlerTrait;
 
     private HandlerInterface $handler;
@@ -31,7 +32,12 @@ class DailyFileHandler implements HandlerInterface, ProcessableHandlerInterface
                 $name
             );
         }
-        $this->handler = $this->getCorrectHandler(new StreamHandler($name, $level), $level);
+        $this->handler = new WhatFailureGroupHandler([
+            new FingersCrossedHandler(
+                new StreamHandler($name, $level),
+                new ErrorLevelActivationStrategy($level),
+            ),
+        ]);
     }
 
     public function isHandling(LogRecord $record): bool

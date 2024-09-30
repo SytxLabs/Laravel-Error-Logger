@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'types' => 'file', // file, daily_file, email, discord, whatsapp, github, gitlab, telegram
-    'level' => 'error', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+    'types' => ['file'], // file, daily_file, email, discord, whatsapp, github, gitlab, telegram
+    'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
 
     'deduplicate' => [
         'enabled' => true,
-        'interval' => 5, // in minutes
+        'interval' => 60, // in seconds
         'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         'path' => 'logs/deduplicate.log', // path to store deduplicate log can be null for no log
     ],
@@ -24,14 +24,14 @@ return [
         'to' => [
             [
                 'address' => '',
-                'name' => '',
+                'name' => '', // optional
             ],
         ],
-        'from' => [
+        'from' => [ // optional
             'address' => '',
             'name' => '',
         ],
-        'reply_to' => [
+        'reply_to' => [ // optional
             'address' => '',
             'name' => '',
         ],

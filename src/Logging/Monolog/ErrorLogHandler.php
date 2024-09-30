@@ -68,6 +68,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function handle(LogRecord $record): bool
     {
+        if ($this->isDuplicate($record)) {
+            return false;
+        }
         if (count($this->processors) > 0) {
             $record = $this->processRecord($record);
         }
@@ -77,13 +80,20 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
                 $result = true;
             }
         }
+        if ($result) {
+            $this->deduplicateAdd($record);
+        }
         return $result;
     }
 
     public function handleBatch(array $records): void
     {
+        $records = array_filter($records, fn ($record) => !$this->isDuplicate($record));
         foreach ($this->handlers as $handler) {
             $handler->handleBatch($records);
+        }
+        foreach ($records as $record) {
+            $this->deduplicateAdd($record);
         }
     }
 
@@ -105,5 +115,87 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
                 new LogRecord(now()->toDateTimeImmutable(), 'error-logger', $level, $message, $context, $extra, $formatted)
             );
         }
+    }
+
+    public function deduplicateAdd(LogRecord $record): void
+    {
+        if (!config('error-logger.deduplication.enabled', false)) {
+            return;
+        }
+        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        if (!file_exists($path)) {
+            touch($path);
+        }
+        $handle = fopen($path, 'a');
+        if ($handle === false) {
+            throw new \RuntimeException('Failed to open file for writing: ' . $path);
+        }
+        flock($handle, LOCK_EX);
+        fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+
+    public function isDuplicate(LogRecord $record): bool
+    {
+        if (!config('error-logger.deduplication.enabled', false)) {
+            return false;
+        }
+        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        if (!file_exists($path)) {
+            return false;
+        }
+        $store = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        $timestampValidity = $record->datetime->getTimestamp() - config('error-logger.deduplicate.interval', 60);
+        $expectedMessage = preg_replace('{[\r\n].*}', '', $record->message);
+        $yesterday = time() - 86400;
+
+        foreach ($store as $log) {
+            [$timestamp, $level, $message] = explode(':', $log, 3);
+
+            if ($level === $record->level->getName() && $message === $expectedMessage && $timestamp > $timestampValidity) {
+                return true;
+            }
+
+            if ($timestamp < $yesterday) {
+                $this->deduplicateCollect();
+            }
+        }
+        return false;
+    }
+
+    public function deduplicateCollect(): void
+    {
+        if (!config('error-logger.deduplication.enabled', false)) {
+            return;
+        }
+        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        if (!file_exists($path)) {
+            touch($path);
+        }
+        $handle = fopen($path, 'rw+');
+        if ($handle === false) {
+            throw new \RuntimeException('Failed to open file for reading and writing: ' . $path);
+        }
+        flock($handle, LOCK_EX);
+        $validLogs = [];
+
+        $timestampValidity = time() - config('error-logger.deduplicate.interval', 60);
+
+        while (!feof($handle)) {
+            $log = fgets($handle);
+            if (is_string($log) && $log !== '' && substr($log, 0, 10) >= $timestampValidity) {
+                $validLogs[] = $log;
+            }
+        }
+
+        ftruncate($handle, 0);
+        rewind($handle);
+        foreach ($validLogs as $log) {
+            fwrite($handle, $log);
+        }
+        flock($handle, LOCK_UN);
+        fclose($handle);
     }
 }
