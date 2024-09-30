@@ -43,6 +43,7 @@ class GitlabProcessingHandler extends AbstractProcessingHandler
         }
         $this->url = null;
         $this->apiKey = null;
+        parent::close();
     }
 
     protected function write(LogRecord $record): void

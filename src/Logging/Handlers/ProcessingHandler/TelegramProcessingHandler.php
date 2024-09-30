@@ -42,6 +42,7 @@ class TelegramProcessingHandler extends AbstractProcessingHandler
         }
         $this->chatId = null;
         $this->apiToken = null;
+        parent::close();
     }
 
     protected function write(LogRecord $record): void

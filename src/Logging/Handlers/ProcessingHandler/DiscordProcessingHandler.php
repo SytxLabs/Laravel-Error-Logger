@@ -39,6 +39,7 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
             $this->discordWebhook = null;
         }
         $this->url = null;
+        parent::close();
     }
 
     protected function write(LogRecord $record): void

@@ -40,6 +40,7 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
         if ($this->whatsAppCallMeBots !== null) {
             $this->whatsAppCallMeBots = null;
         }
+        parent::close();
     }
 
     protected function write(LogRecord $record): void

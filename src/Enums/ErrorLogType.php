@@ -2,10 +2,11 @@
 
 namespace SytxLabs\ErrorLogger\Enums;
 
+use Illuminate\Support\Carbon;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
-use SytxLabs\ErrorLogger\Logging\Handlers\DailyFileHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\EmailHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\InterfaceHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\DiscordProcessingHandler;
@@ -27,9 +28,28 @@ enum ErrorLogType: string
 
     public function getHandler(string $subject, Level $level): HandlerInterface
     {
-        return match ($this) {
-            self::File => new InterfaceHandler(new StreamHandler(config('error-logger.file.path'), $level), $level),
-            self::DailyFile => new DailyFileHandler($level),
+        $handler = match ($this) {
+            self::File => function () use ($level) {
+                $handler = new StreamHandler(config('error-logger.file.path'), $level);
+                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
+                return new InterfaceHandler($handler, $level);
+            },
+            self::DailyFile => function () use ($level) {
+                $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));
+                if (str_contains($name, '{timespan}')) {
+                    $days = config('error-logger.daily_file.days', 7);
+                    $name = str_replace(
+                        '{timespan}',
+                        $days > 1 ?
+                            Carbon::now()->format('Y-m-d') . '_' . Carbon::now()->addDays($days - 1)->format('Y-m-d') :
+                            Carbon::now()->format('Y-m-d'),
+                        $name
+                    );
+                }
+                $handler = new StreamHandler($name, $level);
+                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
+                return new InterfaceHandler($handler, $level);
+            },
             self::Email => new EmailHandler($subject, $level),
             self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level), $level),
             self::WhatsApp => new InterfaceHandler(new WhatsappProcessingHandler($level), $level),
@@ -37,5 +57,9 @@ enum ErrorLogType: string
             self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level), $level),
             self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level), $level),
         };
+        if (is_callable($handler)) {
+            return $handler();
+        }
+        return $handler;
     }
 }
