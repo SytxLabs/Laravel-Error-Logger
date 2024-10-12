@@ -2,9 +2,9 @@
 
 namespace SytxLabs\ErrorLogger\Enums;
 
-use _PHPStan_eb6a95a92\Symfony\Component\Console\Exception\LogicException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use LogicException;
 use Monolog\LogRecord;
 
 enum WebhookFormat: string
@@ -12,6 +12,7 @@ enum WebhookFormat: string
     case Json = 'json';
     case Form = 'form';
     case Xml = 'xml';
+    case None = 'none';
 
     public function send(string $url, string $method, ?string $secretType, array|string|null $secret, LogRecord $record): void
     {
@@ -20,6 +21,7 @@ enum WebhookFormat: string
             self::Json => $this->sendJson($url, $method, $secretType, $secret, $record),
             self::Form => $this->sendForm($url, $method, $secretType, $secret, $record),
             self::Xml => $this->sendXml($url, $method, $secretType, $secret, $record),
+            self::None => $this->sendNone($url, $method, $secretType, $secret),
         };
     }
 
@@ -88,5 +90,10 @@ enum WebhookFormat: string
         }
         $http = $this->setSecretHeader(Http::withHeader('Content-Type', 'text/xml'), $secretType, $secret);
         $http->$method($url, $xmlString);
+    }
+
+    private function sendNone(string $url, string $method, ?string $secretType, array|string|null $secret): void
+    {
+        $this->setSecretHeader(Http::withHeaders([]), $secretType, $secret)->$method($url);
     }
 }

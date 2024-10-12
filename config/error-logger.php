@@ -66,6 +66,6 @@ return [
         'secret_type' => null, // null, basic, token, bearer
         'secret' => null, // for basic a array of username and password, for token a string token, for bearer a string token
         'method' => 'POST',
-        'format' => 'json', // json, form_params, xml
+        'format' => 'json', // json, form_params, xml, none
     ],
 ];
