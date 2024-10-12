@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'types' => ['file'], // file, daily_file, email, discord, whatsapp, github, gitlab, telegram
+    'types' => ['file'], // file, daily_file, email, discord, whatsapp, github, gitlab, telegram, webhook
     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
 
     'deduplicate' => [
