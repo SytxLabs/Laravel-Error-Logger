@@ -10,6 +10,7 @@ use Monolog\Level;
 use Monolog\Logger;
 use Monolog\LogRecord;
 use Psr\Log\AbstractLogger;
+use RuntimeException;
 use Stringable;
 use SytxLabs\ErrorLogger\Enums\ErrorLogType;
 
@@ -126,14 +127,14 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
         if (!file_exists($path)) {
             $dir = dirname($path);
-            if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
+            if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
             }
             touch($path);
         }
-        $handle = fopen($path, 'a');
+        $handle = fopen($path, 'ab');
         if ($handle === false) {
-            throw new \RuntimeException('Failed to open file for writing: ' . $path);
+            throw new RuntimeException('Failed to open file for writing: ' . $path);
         }
         fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
         fclose($handle);
@@ -159,7 +160,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         foreach ($store as $log) {
             [$timestamp, $level, $message] = explode(':', $log, 3);
 
-            if ($level === $record->level->getName() && $message === $expectedMessage && $timestamp > $timestampValidity) {
+            if ($message === $expectedMessage && $level === $record->level->getName() && $timestamp > $timestampValidity) {
                 return true;
             }
 
@@ -182,9 +183,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         if (!file_exists($path)) {
             return;
         }
-        $handle = fopen($path, 'rw+');
+        $handle = fopen($path, 'rwb+');
         if ($handle === false) {
-            throw new \RuntimeException('Failed to open file for reading and writing: ' . $path);
+            throw new RuntimeException('Failed to open file for reading and writing: ' . $path);
         }
         flock($handle, LOCK_EX);
         $validLogs = [];
