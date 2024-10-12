@@ -13,6 +13,7 @@ use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\DiscordProcessingHan
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\GithubProcessingHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\GitlabProcessingHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\TelegramProcessingHandler;
+use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\WebhookProcessingHandler;
 use SytxLabs\ErrorLogger\Logging\Handlers\ProcessingHandler\WhatsappProcessingHandler;
 
 enum ErrorLogType: string
@@ -25,16 +26,12 @@ enum ErrorLogType: string
     case GitHub = 'github';
     case GitLab = 'gitlab';
     case Telegram = 'telegram';
+    case Webhook = 'webhook';
 
     public function getHandler(string $subject, Level $level): HandlerInterface
     {
         $handler = match ($this) {
-            self::File => function () use ($level) {
-                $handler = new StreamHandler(config('error-logger.file.path'), $level);
-                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
-                return new InterfaceHandler($handler, $level);
-            },
-            self::DailyFile => function () use ($level) {
+            self::DailyFile => static function () use ($level) {
                 $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));
                 if (str_contains($name, '{timespan}')) {
                     $days = config('error-logger.daily_file.days', 7);
@@ -56,6 +53,12 @@ enum ErrorLogType: string
             self::GitHub => new InterfaceHandler(new GithubProcessingHandler($level), $level),
             self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level), $level),
             self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level), $level),
+            self::Webhook => new InterfaceHandler(new WebhookProcessingHandler($level), $level),
+            default => static function () use ($level) {
+                $handler = new StreamHandler(config('error-logger.file.path'), $level);
+                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
+                return new InterfaceHandler($handler, $level);
+            },
         };
         if (is_callable($handler)) {
             return $handler();

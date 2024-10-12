@@ -28,6 +28,9 @@
             "SytxLabs\\ErrorLogger\\": "src/"
         }
     },
+    "suggest": {
+        "ext-simplexml": "*"
+    },
     "require": {
         "php": "^8.2|^8.3",
         "psr/log": "^3",
