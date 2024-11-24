@@ -61,7 +61,7 @@ class GitlabProcessingHandler extends AbstractProcessingHandler
     }
 
     /** @noinspection PhpUnusedParameterInspection */
-    private function customErrorHandler(int $code, string $msg): bool
+    public function customErrorHandler(int $code, string $msg): bool
     {
         $this->errorMessage = $msg;
         return true;
