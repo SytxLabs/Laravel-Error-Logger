@@ -49,7 +49,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             if ($type === null) {
                 continue;
             }
-            $this->handlers[] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName(config('error-logger.level'))));
+            $this->handlers[$type->value] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName(config('error-logger.level'))));
         }
         if (count($this->handlers) === 0) {
             throw new InvalidArgumentException('No valid error log types');
@@ -69,33 +69,31 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function handle(LogRecord $record): bool
     {
-        if ($this->isDuplicate($record)) {
-            return false;
-        }
         if (count($this->processors) > 0) {
             $record = $this->processRecord($record);
         }
         $result = false;
-        foreach ($this->handlers as $handler) {
+        foreach ($this->handlers as $type => $handler) {
+            if ($this->isDuplicate($record, $type)) {
+                return false;
+            }
             if ($handler->handle($record)) {
+                $this->deduplicateAdd($record, $type);
                 $result = true;
             }
         }
         $result = $result || $this->isHandling($record);
-        if ($result) {
-            $this->deduplicateAdd($record);
-        }
         return $result;
     }
 
     public function handleBatch(array $records): void
     {
-        $records = array_filter($records, fn ($record) => !$this->isDuplicate($record));
-        foreach ($this->handlers as $handler) {
+        foreach ($this->handlers as $type => $handler) {
+            $records = array_filter($records, fn ($record) => !$this->isDuplicate($record, $type));
             $handler->handleBatch($records);
         }
         foreach ($records as $record) {
-            $this->deduplicateAdd($record);
+            $this->deduplicateAdd($record, $type);
         }
     }
 
@@ -119,7 +117,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
     }
 
-    public function deduplicateAdd(LogRecord $record): void
+    public function deduplicateAdd(LogRecord $record, string $handler): void
     {
         if (!config('error-logger.deduplicate.enabled', false)) {
             return;
@@ -136,11 +134,11 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         if ($handle === false) {
             throw new RuntimeException('Failed to open file for writing: ' . $path);
         }
-        fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
+        fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . $handler . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
         fclose($handle);
     }
 
-    public function isDuplicate(LogRecord $record): bool
+    public function isDuplicate(LogRecord $record, string $handler): bool
     {
         if (!config('error-logger.deduplicate.enabled', false)) {
             return false;
@@ -158,9 +156,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         $collect = false;
 
         foreach ($store as $log) {
-            [$timestamp, $level, $message] = explode(':', $log, 3);
+            [$timestamp, $level, $oldType, $message] = explode(':', $log, 3);
 
-            if ($message === $expectedMessage && $level === $record->level->getName() && $timestamp > $timestampValidity) {
+            if ($message === $expectedMessage && $oldType === $handler && $level === $record->level->getName() && $timestamp > $timestampValidity) {
                 return true;
             }
 
