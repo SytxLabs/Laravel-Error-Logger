@@ -49,8 +49,6 @@ readonly class Github
     {
         $url = sprintf('https://api.github.com/repos/%s/%s/issues', $this->owner, $this->repo);
         $url .= $this->addAccessToken();
-        $title = htmlspecialchars(stripslashes($title), ENT_QUOTES);
-        $body = htmlspecialchars(stripslashes($body), ENT_QUOTES);
         try {
             $response = $this->request()
                 ->withHeaders([
