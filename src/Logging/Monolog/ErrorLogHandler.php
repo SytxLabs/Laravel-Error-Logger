@@ -156,7 +156,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         $collect = false;
 
         foreach ($store as $log) {
-            [$timestamp, $level, $oldType, $message] = explode(':', $log, 3);
+            [$timestamp, $level, $oldType, $message] = explode(':', $log, 4);
 
             if ($message === $expectedMessage && $oldType === $handler && $level === $record->level->getName() && $timestamp > $timestampValidity) {
                 return true;
