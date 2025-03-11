@@ -82,8 +82,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
                 $result = true;
             }
         }
-        $result = $result || $this->isHandling($record);
-        return $result;
+        return $result || $this->isHandling($record);
     }
 
     public function handleBatch(array $records): void
@@ -91,9 +90,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         foreach ($this->handlers as $type => $handler) {
             $records = array_filter($records, fn ($record) => !$this->isDuplicate($record, $type));
             $handler->handleBatch($records);
-        }
-        foreach ($records as $record) {
-            $this->deduplicateAdd($record, $type);
+            foreach ($records as $record) {
+                $this->deduplicateAdd($record, $type);
+            }
         }
     }
 
