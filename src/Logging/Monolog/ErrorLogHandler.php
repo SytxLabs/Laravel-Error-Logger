@@ -49,7 +49,8 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             if ($type === null) {
                 continue;
             }
-            $this->handlers[$type->value] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName(config('error-logger.level'))));
+            $level = config('error-logger.' . $type->value . '.level', config('error-logger.level', 'debug'));
+            $this->handlers[$type->value] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName($level)));
         }
         if (count($this->handlers) === 0) {
             throw new InvalidArgumentException('No valid error log types');

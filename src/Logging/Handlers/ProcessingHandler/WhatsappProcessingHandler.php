@@ -21,7 +21,9 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
     {
         $this->whatsAppCallMeBots = new Collection();
         parent::__construct($level, $bubble);
-        foreach (config('error-logger.whatsapp', []) as $whatsApp) {
+        $config = config('error-logger.whatsapp', []);
+        unset($config['level']);
+        foreach ($config as $whatsApp) {
             $phoneNumber = $whatsApp['phone_number'] ?? '';
             $apiToken = $whatsApp['api_token'] ?? '';
             if (trim($phoneNumber) !== '' && trim($apiToken) !== '') {
