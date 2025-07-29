@@ -24,6 +24,6 @@ class ErrorLoggerServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/error-logger.php', 'error-logger');
         $this->mergeConfigFrom(__DIR__ . '/../config/channels.php', 'logging.channels');
-        $this->app->bind('error-log', static fn () => new LogManager($this->app));
+        $this->app->bind('error-log', fn () => new LogManager($this->app));
     }
 }
