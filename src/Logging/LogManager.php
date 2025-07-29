@@ -94,7 +94,8 @@ class LogManager extends \Illuminate\Log\LogManager
     public function log($level, $message, array $context = [], ?int $deduplicate = null): void
     {
         try {
-            (new ErrorLogHandler())->log(self::toMonologLevel($level), $message, $context, [], null, $deduplicate);
+            $handler = config('logging.channels.error-log.handler', ErrorLogHandler::class);
+            (new $handler())->log(self::toMonologLevel($level), $message, $context, [], null, $deduplicate);
         } catch (Throwable $e) {
             tap($this->createEmergencyLogger(), function ($logger) use ($e) {
                 $logger->emergency('Unable to create configured logger. Using emergency logger.', [
