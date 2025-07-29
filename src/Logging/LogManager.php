@@ -2,6 +2,7 @@
 
 namespace SytxLabs\ErrorLogger\Logging;
 
+use Illuminate\Support\Facades\Log;
 use Monolog\Level;
 use Psr\Log\InvalidArgumentException;
 use Stringable;
@@ -95,6 +96,7 @@ class LogManager extends \Illuminate\Log\LogManager
     {
         try {
             $handler = config('logging.channels.error-log.handler', ErrorLogHandler::class);
+            $context = array_merge($this->sharedContext, Log::sharedContext() ?? [], $context);
             (new $handler())->log(self::toMonologLevel($level), $message, $context, [], null, $deduplicate);
         } catch (Throwable $e) {
             tap($this->createEmergencyLogger(), function ($logger) use ($e) {
