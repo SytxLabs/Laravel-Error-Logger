@@ -18,20 +18,15 @@ readonly class WhatsAppCallMeBot
         if (str_contains($this->apiKey, ',')) {
             $apiKeys = explode(',', $this->apiKey);
             foreach ($apiKeys as $apiKey) {
-                $url = str_replace(
-                    ['{phone}', '{text}', '{apikey}'],
-                    [$this->phoneNumber, urlencode($text), $apiKey],
-                    self::ApiUrl
-                );
-                Http::get($url)->status();
+                $url = str_replace(['{phone}', '{text}', '{apikey}'], [$this->phoneNumber, urlencode($text), $apiKey], self::ApiUrl);
+                try {
+                    Http::get($url)->throw()->status();
+                } catch (Throwable) {
+                }
             }
-            return 200;
+            return true;
         }
-        $url = str_replace(
-            ['{phone}', '{text}', '{apikey}'],
-            [$phoneNumber ?? $this->phoneNumber, urlencode($text), $this->apiKey],
-            self::ApiUrl
-        );
+        $url = str_replace(['{phone}', '{text}', '{apikey}'], [$phoneNumber ?? $this->phoneNumber, urlencode($text), $this->apiKey], self::ApiUrl);
         try {
             Http::get($url)->throw()->status();
         } catch (Throwable) {

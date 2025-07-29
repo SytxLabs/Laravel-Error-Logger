@@ -32,7 +32,7 @@
         "ext-simplexml": "*"
     },
     "require": {
-        "php": "^8.2|^8.3",
+        "php": "^8.2|^8.3|^8.4",
         "psr/log": "^3",
         "monolog/monolog": "^3",
         "illuminate/log": "^10|^11|^12",

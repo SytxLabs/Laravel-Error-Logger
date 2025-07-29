@@ -4,6 +4,7 @@ namespace SytxLabs\ErrorLogger;
 
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
+use SytxLabs\ErrorLogger\Logging\LogManager;
 
 class ErrorLoggerServiceProvider extends ServiceProvider
 {
@@ -23,5 +24,6 @@ class ErrorLoggerServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/error-logger.php', 'error-logger');
         $this->mergeConfigFrom(__DIR__ . '/../config/channels.php', 'logging.channels');
+        $this->app->bind('error-log', static fn () => new LogManager($this->app));
     }
 }

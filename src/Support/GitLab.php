@@ -37,18 +37,12 @@ readonly class GitLab
         [$this->url, $this->project, $this->token] = $args;
     }
 
-    public function getClient(): Client
-    {
-        $client = new Client();
-        $client->setUrl($this->url);
-        $client->authenticate($this->token, Client::AUTH_HTTP_TOKEN);
-        return $client;
-    }
-
     public function openIssue(string $title, string $body): bool
     {
         try {
-            $client = $this->getClient();
+            $client = new Client();
+            $client->setUrl($this->url);
+            $client->authenticate($this->token, Client::AUTH_HTTP_TOKEN);
             $project = $client->projects()->show($this->project);
             $client->issues()->create($project['id'], [
                 'title' => $title,

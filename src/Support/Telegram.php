@@ -2,7 +2,7 @@
 
 namespace SytxLabs\ErrorLogger\Support;
 
-use Illuminate\Http\Client\RequestException;
+use Exception;
 use Illuminate\Support\Facades\Http;
 
 readonly class Telegram
@@ -18,7 +18,7 @@ readonly class Telegram
                 'chat_id' => $chatId ?? $this->chatId,
                 'text' => $message,
             ])->throw();
-        } catch (RequestException) {
+        } catch (Exception) {
             return false;
         }
         return true;
