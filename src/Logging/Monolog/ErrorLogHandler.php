@@ -2,8 +2,8 @@
 
 namespace SytxLabs\ErrorLogger\Logging\Monolog;
 
-use DateTimeImmutable;
 use InvalidArgumentException;
+use Monolog\DateTimeImmutable;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
@@ -112,7 +112,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             throw new InvalidArgumentException('Invalid message');
         }
         $this->handle(
-            new LogRecord(new DateTimeImmutable('now'), config('app.env', 'local'), $level, $message, $context, $extra, $formatted),
+            new LogRecord(new DateTimeImmutable(true), config('app.env', 'local'), $level, $message, $context, $extra, $formatted),
             $deduplicate
         );
     }
