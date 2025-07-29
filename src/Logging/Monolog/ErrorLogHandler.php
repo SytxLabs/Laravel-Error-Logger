@@ -3,6 +3,7 @@
 namespace SytxLabs\ErrorLogger\Logging\Monolog;
 
 use InvalidArgumentException;
+use Monolog\DateTimeImmutable;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\ProcessableHandlerInterface;
 use Monolog\Handler\ProcessableHandlerTrait;
@@ -68,7 +69,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         return $handled;
     }
 
-    public function handle(LogRecord $record): bool
+    public function handle(LogRecord $record, ?int $deduplicate = null): bool
     {
         if (count($this->processors) > 0) {
             $record = $this->processRecord($record);
@@ -79,7 +80,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
                 return false;
             }
             if ($handler->handle($record)) {
-                $this->deduplicateAdd($record, $type);
+                $this->deduplicateAdd($record, $type, $deduplicate);
                 $result = true;
             }
         }
@@ -105,19 +106,18 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         unset($this->handlers);
     }
 
-    public function log($level, string|Stringable $message, array $context = [], array $extra = [], mixed $formatted = null): void
+    public function log($level, string|Stringable $message, array $context = [], array $extra = [], mixed $formatted = null, ?int $deduplicate = null): void
     {
         if (!is_string($message) && !($message instanceof Stringable)) {
             throw new InvalidArgumentException('Invalid message');
         }
-        foreach ($this->handlers as $handler) {
-            $handler->handle(
-                new LogRecord(now()->toDateTimeImmutable(), 'error-logger', $level, $message, $context, $extra, $formatted)
-            );
-        }
+        $this->handle(
+            new LogRecord(new DateTimeImmutable(true), config('app.env', 'local'), $level, $message, $context, $extra, $formatted),
+            $deduplicate
+        );
     }
 
-    public function deduplicateAdd(LogRecord $record, string $handler): void
+    public function deduplicateAdd(LogRecord $record, string $handler, ?int $deduplicate = null): void
     {
         if (!config('error-logger.deduplicate.enabled', false)) {
             return;
@@ -134,7 +134,14 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         if ($handle === false) {
             throw new RuntimeException('Failed to open file for writing: ' . $path);
         }
-        fwrite($handle, $record->datetime->getTimestamp() . ':' . $record->level->getName() . ':' . $handler . ':' . preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL);
+        fwrite(
+            $handle,
+            $record->datetime->getTimestamp() . ':' .
+            ($record->datetime->getTimestamp() + ($deduplicate ?? config('error-logger.deduplicate.interval', 60))) . ':' .
+            $record->level->getName() . ':' .
+            $handler . ':' .
+            preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL
+        );
         fclose($handle);
     }
 
@@ -149,20 +156,20 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         $store = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-        $timestampValidity = $record->datetime->getTimestamp() - config('error-logger.deduplicate.interval', 60);
+        $timestampValidity = $record->datetime->getTimestamp();
         $expectedMessage = preg_replace('{[\r\n].*}', '', $record->message);
         $yesterday = time() - 86400;
 
         $collect = false;
 
         foreach ($store as $log) {
-            $logExploded = explode(':', $log, 4);
-            if (count($logExploded) !== 4) {
+            $logExploded = explode(':', $log, 5);
+            if (count($logExploded) !== 5) {
                 continue;
             }
-            [$timestamp, $level, $oldType, $message] = $logExploded;
+            [$timestamp, $timestampValidTo, $level, $oldHandle, $message] = $logExploded;
 
-            if ($message === $expectedMessage && $oldType === $handler && $level === $record->level->getName() && $timestamp > $timestampValidity) {
+            if ($message === $expectedMessage && $oldHandle === $handler && $level === $record->level->getName() && $timestampValidTo > $timestampValidity) {
                 return true;
             }
 
@@ -192,12 +199,18 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         flock($handle, LOCK_EX);
         $validLogs = [];
 
-        $timestampValidity = time() - config('error-logger.deduplicate.interval', 60);
+        $timestampValidity = time();
 
         while (!feof($handle)) {
             $log = fgets($handle);
-            if (is_string($log) && $log !== '' && substr($log, 0, 10) >= $timestampValidity) {
-                $validLogs[] = $log;
+            if (is_string($log) && $log !== '') {
+                $logExploded = explode(':', $log, 5);
+                if (count($logExploded) > 1) {
+                    [, $timestampValidTo] = $logExploded;
+                    if ($timestampValidTo >= $timestampValidity) {
+                        $validLogs[] = $log;
+                    }
+                }
             }
         }
 

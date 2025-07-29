@@ -3,7 +3,6 @@
 namespace SytxLabs\ErrorLogger\Support;
 
 use Exception;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -47,40 +46,17 @@ readonly class Github
 
     public function openIssue(string $title, string $body): bool
     {
-        $url = sprintf('https://api.github.com/repos/%s/%s/issues', $this->owner, $this->repo);
-        $url .= $this->addAccessToken();
+        $hasToken = trim($this->token) !== '';
+        $url = sprintf('https://api.github.com/repos/%s/%s/issues', $this->owner, $this->repo) . ($hasToken ? ('?access_token=' . $this->token) : '');
         try {
-            $response = $this->request()
-                ->withHeaders([
-                    'Accept' => 'application/vnd.github.v3+json',
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($url, [
-                    'title' => $title,
-                    'body' => $body,
-                ])
+            $client = $hasToken ? Http::withToken($this->token, 'token')->withUserAgent('PHP') : Http::withUserAgent('PHP');
+            $response = $client->withHeaders(['Accept' => 'application/vnd.github.v3+json', 'Content-Type' => 'application/json'])
+                ->post($url, ['title' => $title, 'body' => $body])
                 ->throw()
                 ->json();
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
         return !isset($response['message']);
-    }
-
-    private function addAccessToken(): string
-    {
-        if (trim($this->token) !== '') {
-            return '?access_token=' . $this->token;
-        }
-        return '';
-    }
-
-    private function request(): PendingRequest
-    {
-        if (trim($this->token) !== '') {
-            return Http::withToken($this->token, 'token')
-                ->withUserAgent('PHP');
-        }
-        return Http::withUserAgent('PHP');
     }
 }
