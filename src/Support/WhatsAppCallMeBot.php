@@ -2,8 +2,8 @@
 
 namespace SytxLabs\ErrorLogger\Support;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
-use Throwable;
 
 readonly class WhatsAppCallMeBot
 {
@@ -17,19 +17,22 @@ readonly class WhatsAppCallMeBot
     {
         if (str_contains($this->apiKey, ',')) {
             $apiKeys = explode(',', $this->apiKey);
+            $success = false;
             foreach ($apiKeys as $apiKey) {
                 $url = str_replace(['{phone}', '{text}', '{apikey}'], [$this->phoneNumber, urlencode($text), $apiKey], self::ApiUrl);
                 try {
                     Http::get($url)->throw()->status();
-                } catch (Throwable) {
+                    $success = true;
+                } catch (Exception) {
                 }
             }
-            return true;
+            return $success;
         }
         $url = str_replace(['{phone}', '{text}', '{apikey}'], [$phoneNumber ?? $this->phoneNumber, urlencode($text), $this->apiKey], self::ApiUrl);
         try {
             Http::get($url)->throw()->status();
-        } catch (Throwable) {
+            return true;
+        } catch (Exception) {
         }
         return false;
     }

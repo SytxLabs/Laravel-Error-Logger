@@ -31,7 +31,7 @@ class DiscordFormatter extends NormalizerFormatter
         if (count($record->extra) > 0) {
             $output .= 'Extra: ' . PHP_EOL . '---------------------' . PHP_EOL;
             foreach ($record->extra as $key => $value) {
-                $output .= '  ' .$key . ': ' . PHP_EOL . '```json' . PHP_EOL;
+                $output .= '  ' . $key . ': ' . PHP_EOL . '```json' . PHP_EOL;
                 $output .= $this->convertToString($value) . PHP_EOL . '```' . PHP_EOL . PHP_EOL;
             }
             $output .= '---------------------' . PHP_EOL;

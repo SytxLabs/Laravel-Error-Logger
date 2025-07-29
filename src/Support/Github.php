@@ -46,12 +46,11 @@ readonly class Github
 
     public function openIssue(string $title, string $body): bool
     {
-        $url = sprintf('https://api.github.com/repos/%s/%s/issues', $this->owner, $this->repo) .
-            (trim($this->token) !== '' ? ('?access_token=' . $this->token) : '');
+        $hasToken = trim($this->token) !== '';
+        $url = sprintf('https://api.github.com/repos/%s/%s/issues', $this->owner, $this->repo) . ($hasToken ? ('?access_token=' . $this->token) : '');
         try {
-            $response = (
-                trim($this->token) !== '' ? Http::withToken($this->token, 'token')->withUserAgent('PHP') : Http::withUserAgent('PHP')
-            )->withHeaders(['Accept' => 'application/vnd.github.v3+json', 'Content-Type' => 'application/json',])
+            $client = $hasToken ? Http::withToken($this->token, 'token')->withUserAgent('PHP') : Http::withUserAgent('PHP');
+            $response = $client->withHeaders(['Accept' => 'application/vnd.github.v3+json', 'Content-Type' => 'application/json'])
                 ->post($url, ['title' => $title, 'body' => $body])
                 ->throw()
                 ->json();
