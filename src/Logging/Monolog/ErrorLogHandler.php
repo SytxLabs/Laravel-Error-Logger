@@ -76,13 +76,13 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         $result = false;
         foreach ($this->handlers as $type => $handler) {
-            if ($this->isDuplicate($record, $type)) {
+            if ($this->isDuplicate($record, $type, $deduplicate)) {
                 return false;
             }
             if ($handler->handle($record)) {
-                $this->deduplicateAdd($record, $type, $deduplicate);
                 $result = true;
             }
+            $this->deduplicateAdd($record, $type, $deduplicate);
         }
         return $result || $this->isHandling($record);
     }
@@ -119,7 +119,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function deduplicateAdd(LogRecord $record, string $handler, ?int $deduplicate = null): void
     {
-        if (!config('error-logger.deduplicate.enabled', false)) {
+        if (!config('error-logger.deduplicate.enabled', false) && $deduplicate === null) {
             return;
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
@@ -145,9 +145,9 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         fclose($handle);
     }
 
-    public function isDuplicate(LogRecord $record, string $handler): bool
+    public function isDuplicate(LogRecord $record, string $handler, ?int $deduplicate = null): bool
     {
-        if (!config('error-logger.deduplicate.enabled', false)) {
+        if (!config('error-logger.deduplicate.enabled', false) && $deduplicate === null) {
             return false;
         }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
@@ -185,9 +185,6 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function deduplicateCollect(): void
     {
-        if (!config('error-logger.deduplicate.enabled', false)) {
-            return;
-        }
         $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
         if (!file_exists($path)) {
             return;
