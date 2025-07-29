@@ -21,20 +21,21 @@ class DiscordFormatter extends NormalizerFormatter
         $output .= 'Time: `' . $this->formatDate($record->datetime) . '`' . PHP_EOL;
         $output .= 'Channel: `' . $record->channel . '`' . PHP_EOL;
         if (count($record->context) > 0) {
-            $output .= 'Context: ' . PHP_EOL . '---------------------' . PHP_EOL;
+            $output .= 'Context: ' . PHP_EOL . '<hr>' . PHP_EOL;
             foreach ($record->context as $key => $value) {
-                $output .= '  ' . $key . ': ' . PHP_EOL . '```json' . PHP_EOL;
+                $output .= '> ' . $key . ': ' . PHP_EOL . '```json' . PHP_EOL;
                 $output .= $this->convertToString($value) . PHP_EOL . '```' . PHP_EOL . PHP_EOL;
             }
-            $output .= '---------------------' . PHP_EOL;
+        }
+        if (count($record->context) > 0 && count($record->extra) > 0) {
+            $output .= '<hr>' . PHP_EOL;
         }
         if (count($record->extra) > 0) {
-            $output .= 'Extra: ' . PHP_EOL . '---------------------' . PHP_EOL;
+            $output .= 'Extra: ' . PHP_EOL . '<hr>' . PHP_EOL;
             foreach ($record->extra as $key => $value) {
-                $output .= '  ' . $key . ': ' . PHP_EOL . '```json' . PHP_EOL;
+                $output .= '> ' . $key . ': ' . PHP_EOL . '```json' . PHP_EOL;
                 $output .= $this->convertToString($value) . PHP_EOL . '```' . PHP_EOL . PHP_EOL;
             }
-            $output .= '---------------------' . PHP_EOL;
         }
         $this->discordWebhook?->setTxt($output);
         return $output;
