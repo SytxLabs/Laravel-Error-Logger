@@ -111,7 +111,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             throw new InvalidArgumentException('Invalid message');
         }
         $this->handle(
-            new LogRecord(now()->toDateTimeImmutable(), 'error-logger', $level, $message, $context, $extra, $formatted),
+            new LogRecord(now()->toDateTimeImmutable(), config('app.env', 'local'), $level, $message, $context, $extra, $formatted),
             $deduplicate
         );
     }
