@@ -122,7 +122,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         if (is_string($replyTo) && !empty($replyTo)) {
             $replyTo = ['address' => trim($replyTo)];
         }
-        if (!empty($from['address'])) {
+        if (!empty($replyTo['address'])) {
             $email->replyTo(new Address(trim($replyTo['address']), trim($replyTo['name'] ?? '')));
         } else {
             $email->replyTo(new Address(config('mail.from.address', ''), config('mail.from.name', '')));
