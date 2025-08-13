@@ -119,10 +119,11 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function deduplicateAdd(LogRecord $record, string $handler, ?int $deduplicate = null): void
     {
-        if (!config('error-logger.deduplicate.enabled', false) && $deduplicate === null) {
+        $deduplicateConfig = $this->getDeduplicationConfig($handler);
+        if (!$deduplicateConfig['enable'] && $deduplicate === null) {
             return;
         }
-        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        $path = $deduplicateConfig['path'];
         if (!file_exists($path)) {
             $dir = dirname($path);
             if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
@@ -137,7 +138,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         fwrite(
             $handle,
             $record->datetime->getTimestamp() . ':' .
-            ($record->datetime->getTimestamp() + ($deduplicate ?? config('error-logger.deduplicate.interval', 60))) . ':' .
+            ($record->datetime->getTimestamp() + ($deduplicate ?? $deduplicateConfig['interval'])) . ':' .
             $record->level->getName() . ':' .
             $handler . ':' .
             preg_replace('{[\r\n].*}', '', $record->message) . PHP_EOL
@@ -147,10 +148,11 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
 
     public function isDuplicate(LogRecord $record, string $handler, ?int $deduplicate = null): bool
     {
-        if (!config('error-logger.deduplicate.enabled', false) && $deduplicate === null) {
+        $deduplicateConfig = $this->getDeduplicationConfig($handler);
+        if (!$deduplicateConfig['enable'] && $deduplicate === null) {
             return false;
         }
-        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        $path = $deduplicateConfig['path'];
         if (!file_exists($path)) {
             return false;
         }
@@ -178,14 +180,15 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             }
         }
         if ($collect) {
-            $this->deduplicateCollect();
+            $this->deduplicateCollect($handler);
         }
         return false;
     }
 
-    public function deduplicateCollect(): void
+    public function deduplicateCollect(string $handler): void
     {
-        $path = config('error-logger.deduplicate.path', storage_path('logs/deduplication.log'));
+        $deduplicateConfig = $this->getDeduplicationConfig($handler);
+        $path = $deduplicateConfig['path'];
         if (!file_exists($path)) {
             return;
         }
@@ -218,5 +221,23 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         }
         flock($handle, LOCK_UN);
         fclose($handle);
+    }
+
+    /**
+     * @return array{enable: bool, interval: int, level: string, path: string}
+     */
+    public function getDeduplicationConfig(string $handler): array
+    {
+        $defaultConfig = [
+            'enabled' => false,
+            'interval' => 60,
+            'level' => 'debug',
+            'path' => storage_path('logs/deduplication.log'),
+        ];
+        $deduplicateConfig = config('error-logger.' . $handler . '.deduplicate', config('error-logger.deduplicate', []));
+        if (!is_array($deduplicateConfig)) {
+            return $defaultConfig;
+        }
+        return array_replace($defaultConfig, $deduplicateConfig);
     }
 }
