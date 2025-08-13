@@ -120,7 +120,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
     public function deduplicateAdd(LogRecord $record, string $handler, ?int $deduplicate = null): void
     {
         $deduplicateConfig = $this->getDeduplicationConfig($handler);
-        if (!$deduplicateConfig['enable'] && $deduplicate === null) {
+        if (!$deduplicateConfig['enabled'] && $deduplicate === null) {
             return;
         }
         $path = $deduplicateConfig['path'];
@@ -149,7 +149,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
     public function isDuplicate(LogRecord $record, string $handler, ?int $deduplicate = null): bool
     {
         $deduplicateConfig = $this->getDeduplicationConfig($handler);
-        if (!$deduplicateConfig['enable'] && $deduplicate === null) {
+        if (!$deduplicateConfig['enabled'] && $deduplicate === null) {
             return false;
         }
         $path = $deduplicateConfig['path'];
@@ -224,7 +224,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
     }
 
     /**
-     * @return array{enable: bool, interval: int, level: string, path: string}
+     * @return array{enabled: bool, interval: int, level: string, path: string}
      */
     public function getDeduplicationConfig(string $handler): array
     {
