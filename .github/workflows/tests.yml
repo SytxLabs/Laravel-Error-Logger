@@ -1,4 +1,4 @@
-name: Check code style
+name: Execute tests
 
 on: [push]
 
@@ -11,7 +11,7 @@ jobs:
       matrix:
         php: [8.2,8.3,8.4]
 
-    name: Code style
+    name: Tests
 
     steps:
       - name: Checkout code
