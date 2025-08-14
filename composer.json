@@ -1,67 +1,74 @@
 {
-    "name": "sytxlabs/laravel-error-logger",
-    "description": "A Laravel package to log errors",
-    "type": "library",
-    "license": "MIT",
-    "keywords": [
-        "laravel",
-        "error",
-        "logger",
-        "log",
-        "email",
-        "gitlab",
-        "github",
-        "discord",
-        "whatsapp",
-        "telegram"
-    ],
-    "authors": [
-        {
-            "name": "Shaun Lüdeke",
-            "email": "info@sytxlabs.eu",
-            "homepage": "https://sytxlabs.eu",
-            "role": "Developer"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "SytxLabs\\ErrorLogger\\": "src/"
-        }
-    },
-    "suggest": {
-        "ext-simplexml": "*"
-    },
-    "require": {
-        "php": "^8.2|^8.3|^8.4",
-        "psr/log": "^3",
-        "monolog/monolog": "^3",
-        "illuminate/log": "^10|^11|^12",
-        "illuminate/mail": "^10|^11|^12",
-        "illuminate/support": "^10|^11|^12",
-        "symfony/mailer": "^6|^7",
-        "guzzlehttp/guzzle": "^7.8",
-        "m4tthumphrey/php-gitlab-api": "^11.14|^12.0.0",
-        "symfony/http-client": "^7.0"
-    },
-    "require-dev": {
-        "orchestra/testbench": "^8.5|^9.1|^10",
-        "portavice/laravel-pint-config": "^2.0"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "php-http/discovery": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "SytxLabs\\ErrorLogger\\ErrorLoggerServiceProvider"
-            ]
-        }
-    },
-    "scripts": {
-        "cs": "pint --config vendor/portavice/laravel-pint-config/pint.json --test",
-        "csfix": "pint --config vendor/portavice/laravel-pint-config/pint.json"
+  "name": "sytxlabs/laravel-error-logger",
+  "description": "A Laravel package to log errors",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "error",
+    "logger",
+    "log",
+    "email",
+    "gitlab",
+    "github",
+    "discord",
+    "whatsapp",
+    "telegram"
+  ],
+  "authors": [
+    {
+      "name": "Shaun Lüdeke",
+      "email": "info@sytxlabs.eu",
+      "homepage": "https://sytxlabs.eu",
+      "role": "Developer"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "SytxLabs\\ErrorLogger\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SytxLabs\\ErrorLogger\\Tests\\": "tests/"
+    }
+  },
+  "suggest": {
+    "ext-simplexml": "*"
+  },
+  "require": {
+    "php": "^8.2|^8.3|^8.4",
+    "psr/log": "^3",
+    "monolog/monolog": "^3",
+    "illuminate/log": "^10|^11|^12",
+    "illuminate/mail": "^10|^11|^12",
+    "illuminate/support": "^10|^11|^12",
+    "symfony/mailer": "^6|^7",
+    "guzzlehttp/guzzle": "^7.8",
+    "m4tthumphrey/php-gitlab-api": "^11.14|^12.0.0",
+    "symfony/http-client": "^7.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.5|^9.1|^10",
+    "portavice/laravel-pint-config": "^2.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SytxLabs\\ErrorLogger\\ErrorLoggerServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "cs": "pint --config vendor/portavice/laravel-pint-config/pint.json --test",
+    "csfix": "pint --config vendor/portavice/laravel-pint-config/pint.json",
+    "test": "phpunit"
+  }
 }
