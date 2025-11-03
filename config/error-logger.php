@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'types' => ['file'], // file, daily_file, email, discord, whatsapp, github, gitlab, telegram, webhook
+    'types' => ['file'], // file, daily_file, email, discord, whatsapp, github, gitlab, telegram, webhook, stdout, stderr
     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
 
     'deduplicate' => [
@@ -123,6 +123,24 @@ return [
         'secret' => null, // for basic a array of username and password, for token a string token, for bearer a string token
         'method' => 'POST',
         'format' => 'json', // json, form_params, xml, none
+        // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+        // 'deduplicate' => [
+        //     'enabled' => true,
+        //     'interval' => 60, // in seconds
+        //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+        //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
+        // ],
+    ],
+    'stdout' => [
+        // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+        // 'deduplicate' => [
+        //     'enabled' => true,
+        //     'interval' => 60, // in seconds
+        //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
+        //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
+        // ],
+    ],
+    'stderr' => [
         // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         // 'deduplicate' => [
         //     'enabled' => true,

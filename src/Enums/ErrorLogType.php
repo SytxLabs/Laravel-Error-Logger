@@ -27,6 +27,8 @@ enum ErrorLogType: string
     case GitLab = 'gitlab';
     case Telegram = 'telegram';
     case Webhook = 'webhook';
+    case Stdout = 'stdout';
+    case Stderr = 'stderr';
 
     public function getHandler(string $subject, Level $level): HandlerInterface
     {
@@ -54,6 +56,16 @@ enum ErrorLogType: string
             self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level), $level),
             self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level), $level),
             self::Webhook => new InterfaceHandler(new WebhookProcessingHandler($level), $level),
+            self::Stdout => static function () use ($level) {
+                $handler = new StreamHandler('php://stdout', $level);
+                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
+                return new InterfaceHandler($handler, $level);
+            },
+            self::Stderr => static function () use ($level) {
+                $handler = new StreamHandler('php://stderr', $level);
+                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
+                return new InterfaceHandler($handler, $level);
+            },
             default => static function () use ($level) {
                 $handler = new StreamHandler(config('error-logger.file.path'), $level);
                 $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
