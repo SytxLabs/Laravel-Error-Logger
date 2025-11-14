@@ -4,6 +4,7 @@ namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\FingersCrossedHandler;
@@ -39,7 +40,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         }
         $email = $this->setFrom($email);
         $email = $this->setReplyTo($email)
-            ->subject($subject)
+            ->subject(Str::limit($subject, 150))
             ->priority((ErrorLogEmailPriority::tryFrom(config('error-logger.email.priority', ErrorLogEmailPriority::Normal->value)) ?? ErrorLogEmailPriority::Normal)->getPriority());
         $driver = config('error-logger.email.drive');
         if ($driver === null) {
@@ -56,7 +57,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         );
         $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
         $this->handler = new WhatFailureGroupHandler([
-            new FingersCrossedHandler($mailHandler, new ErrorLevelActivationStrategy($level), ),
+            new FingersCrossedHandler($mailHandler, new ErrorLevelActivationStrategy($level)),
         ]);
     }
 
