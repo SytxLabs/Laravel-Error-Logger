@@ -95,15 +95,12 @@ class LogManager extends \Illuminate\Log\LogManager
     public function log($level, $message, array $context = [], ?int $deduplicate = null): void
     {
         try {
-            $handler = config('logging.channels.error-log.handler', ErrorLogHandler::class);
-            $context = array_merge($this->sharedContext, Log::sharedContext() ?? [], $context);
-            (new $handler())->log(self::toMonologLevel($level), $message, $context, [], null, $deduplicate);
+            (new (config('logging.channels.error-log.handler', ErrorLogHandler::class))())
+                ->log(self::toMonologLevel($level), $message, array_merge($this->sharedContext, Log::sharedContext() ?? [], $context), [], null, $deduplicate);
         } catch (Throwable $e) {
-            tap($this->createEmergencyLogger(), function ($logger) use ($e) {
-                $logger->emergency('Unable to create configured logger. Using emergency logger.', [
-                    'exception' => $e,
-                ]);
-            })->log($level, $message, $context);
+            tap($this->createEmergencyLogger(), static fn ($logger) => $logger->emergency('Unable to create configured logger. Using emergency logger.', [
+                'exception' => $e,
+            ]))->log($level, $message, $context);
         }
     }
 
@@ -121,7 +118,7 @@ class LogManager extends \Illuminate\Log\LogManager
                 }
                 return $levelEnum;
             }
-            $upper = strtr(substr($level, 0, 1), 'dinweca', 'DINWECA') . strtolower(substr($level, 1));
+            $upper = strtr($level[0], 'dinweca', 'DINWECA') . strtolower(substr($level, 1));
             if (defined(Level::class.'::'.$upper)) {
                 return constant(Level::class . '::' . $upper);
             }

@@ -34,24 +34,16 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             'APP_NAME' => config('app.name'),
             'APP_BASEURL' => config('app.url'),
         ]);
-        $subject = str_replace(
-            $replacements->keys()->map(fn ($k) => '{{' . $k . '}}')->all(),
-            $replacements->values()->all(),
-            '{{APP_NAME}} [%datetime%] %channel%.%level_name%: %message%'
-        );
-        if (!is_array($types)) {
-            $types = [$types];
-        }
+        $subject = str_replace($replacements->keys()->map(fn ($k) => '{{' . $k . '}}')->all(), $replacements->values()->all(), '{{APP_NAME}} [%datetime%] %channel%.%level_name%: %message%');
         $this->handlers = [];
-        foreach ($types as $type) {
+        foreach ((is_array($types) ? $types : [$types]) as $type) {
             if (!($type instanceof ErrorLogType)) {
                 $type = ErrorLogType::tryFrom($type);
             }
             if ($type === null) {
                 continue;
             }
-            $level = config('error-logger.' . $type->value . '.level', config('error-logger.level', 'debug'));
-            $this->handlers[$type->value] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName($level)));
+            $this->handlers[$type->value] = $type->getHandler($subject, Logger::toMonologLevel(Level::fromName(config('error-logger.' . $type->value . '.level', config('error-logger.level', 'debug')))));
         }
         if (count($this->handlers) === 0) {
             throw new InvalidArgumentException('No valid error log types');
@@ -171,7 +163,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
             }
             [$timestamp, $timestampValidTo, $level, $oldHandle, $message] = $logExploded;
 
-            if ($message === $expectedMessage && $oldHandle === $handler && $level === $record->level->getName() && $timestampValidTo > $timestampValidity) {
+            if ($message === $expectedMessage && $oldHandle === $handler && $timestampValidTo > $timestampValidity && $level === $record->level->getName()) {
                 return true;
             }
 

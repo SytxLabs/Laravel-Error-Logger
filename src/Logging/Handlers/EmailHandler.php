@@ -88,7 +88,6 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
     {
         $recipient = config('error-logger.email.to', []);
         if (is_string($recipient) && !empty($recipient)) {
-            // If the recipient is a string, we assume it's a comma-separated or semicolon-seperated list of email addresses
             $recipient = array_map('trim', preg_split('/[;,]/', $recipient) ?? Arr::wrap($recipient));
         }
         if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null)) {

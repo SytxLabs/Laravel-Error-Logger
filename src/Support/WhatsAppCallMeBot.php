@@ -16,21 +16,18 @@ readonly class WhatsAppCallMeBot
     public function send(string $text, ?string $phoneNumber = null): bool
     {
         if (str_contains($this->apiKey, ',')) {
-            $apiKeys = explode(',', $this->apiKey);
             $success = false;
-            foreach ($apiKeys as $apiKey) {
-                $url = str_replace(['{phone}', '{text}', '{apikey}'], [$this->phoneNumber, urlencode($text), $apiKey], self::ApiUrl);
+            foreach (explode(',', $this->apiKey) as $apiKey) {
                 try {
-                    Http::get($url)->throw()->status();
+                    Http::get(str_replace(['{phone}', '{text}', '{apikey}'], [$this->phoneNumber, urlencode($text), $apiKey], self::ApiUrl))->throw()->status();
                     $success = true;
                 } catch (Exception) {
                 }
             }
             return $success;
         }
-        $url = str_replace(['{phone}', '{text}', '{apikey}'], [$phoneNumber ?? $this->phoneNumber, urlencode($text), $this->apiKey], self::ApiUrl);
         try {
-            Http::get($url)->throw()->status();
+            Http::get(str_replace(['{phone}', '{text}', '{apikey}'], [$phoneNumber ?? $this->phoneNumber, urlencode($text), $this->apiKey], self::ApiUrl))->throw()->status();
             return true;
         } catch (Exception) {
         }

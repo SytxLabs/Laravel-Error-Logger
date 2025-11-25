@@ -18,7 +18,7 @@ class InterfaceHandler implements HandlerInterface, ProcessableHandlerInterface
 
     private HandlerInterface $handler;
 
-    public function __construct(AbstractProcessingHandler $class, Level $level)
+    public function __construct(AbstractProcessingHandler|HandlerInterface $class, Level $level)
     {
         $this->handler = new WhatFailureGroupHandler([
             new FingersCrossedHandler($class, new ErrorLevelActivationStrategy($level)),
