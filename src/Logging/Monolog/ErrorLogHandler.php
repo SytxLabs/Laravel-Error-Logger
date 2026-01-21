@@ -2,6 +2,7 @@
 
 namespace SytxLabs\ErrorLogger\Logging\Monolog;
 
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Monolog\DateTimeImmutable;
 use Monolog\Handler\HandlerInterface;
@@ -27,7 +28,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
     public function __construct()
     {
         $types = config('error-logger.types');
-        if ($types === null) {
+        if ($types === null || (is_array($types) && count($types) === 0)) {
             throw new InvalidArgumentException('Invalid error log type');
         }
         $replacements = collect([
@@ -36,7 +37,7 @@ class ErrorLogHandler extends AbstractLogger implements HandlerInterface, Proces
         ]);
         $subject = str_replace($replacements->keys()->map(fn ($k) => '{{' . $k . '}}')->all(), $replacements->values()->all(), '{{APP_NAME}} [%datetime%] %channel%.%level_name%: %message%');
         $this->handlers = [];
-        foreach ((is_array($types) ? $types : [$types]) as $type) {
+        foreach (Arr::wrap($types) as $type) {
             if (!($type instanceof ErrorLogType)) {
                 $type = ErrorLogType::tryFrom($type);
             }
