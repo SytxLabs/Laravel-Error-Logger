@@ -61,20 +61,14 @@ class DiscordWebhook
                 'username' => $this->username,
                 'tts' => false,
                 'avatar_url' => $this->avatar,
-                'embeds' => [
-                    [
-                        'title' => $this->title,
-                        'type' => 'rich',
-                        'description' => $this->txt,
-                        'timestamp' => $dateTime ?? date('c'),
-                        'color' => hexdec($this->hex),
-
-                        // Footer
-                        'footer' => [
-                            'text' => $this->footer,
-                        ],
-                    ],
-                ],
+                'embeds' => [[
+                    'title' => $this->title,
+                    'type' => 'rich',
+                    'description' => $this->txt,
+                    'timestamp' => $dateTime ?? date('c'),
+                    'color' => hexdec($this->hex),
+                    'footer' => ['text' => $this->footer],
+                ]],
             ])->throw()->successful();
         } catch (Exception) {
         }

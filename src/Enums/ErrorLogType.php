@@ -27,25 +27,24 @@ enum ErrorLogType: string
     case GitLab = 'gitlab';
     case Telegram = 'telegram';
     case Webhook = 'webhook';
+    case Stdout = 'stdout';
+    case Stderr = 'stderr';
 
     public function getHandler(string $subject, Level $level): HandlerInterface
     {
+        $defaultFormat = new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true);
         $handler = match ($this) {
-            self::DailyFile => static function () use ($level) {
+            self::DailyFile => static function () use ($level, $defaultFormat) {
                 $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));
                 if (str_contains($name, '{timespan}')) {
                     $days = config('error-logger.daily_file.days', 7);
                     $name = str_replace(
                         '{timespan}',
-                        $days > 1 ?
-                            Carbon::now()->format('Y-m-d') . '_' . Carbon::now()->addDays($days - 1)->format('Y-m-d') :
-                            Carbon::now()->format('Y-m-d'),
+                        $days > 1 ? Carbon::now()->format('Y-m-d') . '_' . Carbon::now()->addDays($days - 1)->format('Y-m-d') : Carbon::now()->format('Y-m-d'),
                         $name
                     );
                 }
-                $handler = new StreamHandler($name, $level);
-                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
-                return new InterfaceHandler($handler, $level);
+                return new InterfaceHandler((new StreamHandler($name, $level))->setFormatter($defaultFormat), $level);
             },
             self::Email => new EmailHandler($subject, $level),
             self::Discord => new InterfaceHandler(new DiscordProcessingHandler($level), $level),
@@ -54,15 +53,10 @@ enum ErrorLogType: string
             self::GitLab => new InterfaceHandler(new GitlabProcessingHandler($level), $level),
             self::Telegram => new InterfaceHandler(new TelegramProcessingHandler($level), $level),
             self::Webhook => new InterfaceHandler(new WebhookProcessingHandler($level), $level),
-            default => static function () use ($level) {
-                $handler = new StreamHandler(config('error-logger.file.path'), $level);
-                $handler->setFormatter(new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true));
-                return new InterfaceHandler($handler, $level);
-            },
+            self::Stdout => new InterfaceHandler((new StreamHandler('php://stdout', $level))->setFormatter($defaultFormat), $level),
+            self::Stderr => new InterfaceHandler((new StreamHandler('php://stderr', $level))->setFormatter($defaultFormat), $level),
+            default => new InterfaceHandler((new StreamHandler(config('error-logger.file.path'), $level))->setFormatter($defaultFormat), $level),
         };
-        if (is_callable($handler)) {
-            return $handler();
-        }
-        return $handler;
+        return value($handler);
     }
 }

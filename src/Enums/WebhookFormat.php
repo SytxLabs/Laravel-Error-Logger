@@ -31,13 +31,11 @@ enum WebhookFormat: string
             return $http;
         }
         $secretType = strtolower($secretType);
-        if ($secretType === 'bearer') {
-            return $http->withToken($secret);
-        }
-        if ($secretType === 'basic' && is_array($secret) && count($secret) === 2) {
-            return $http->withBasicAuth($secret[0], $secret[1]);
-        }
-        return $http;
+        return match (true) {
+            $secretType === 'bearer' => $http->withToken($secret),
+            $secretType === 'basic' && is_array($secret) && count($secret) === 2 => $http->withBasicAuth($secret[0], $secret[1]),
+            default => $http
+        };
     }
 
     private function sendJson(string $url, string $method, ?string $secretType, array|string|null $secret, LogRecord $record): void

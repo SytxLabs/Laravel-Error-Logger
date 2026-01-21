@@ -30,9 +30,6 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
         $this->discordWebhook = new DiscordWebhook($this->url);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function close(): void
     {
         if ($this->discordWebhook !== null) {

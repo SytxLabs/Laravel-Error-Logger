@@ -43,8 +43,7 @@ readonly class GitLab
             $client = new Client();
             $client->setUrl($this->url);
             $client->authenticate($this->token, Client::AUTH_HTTP_TOKEN);
-            $project = $client->projects()->show($this->project);
-            $client->issues()->create($project['id'], [
+            $client->issues()->create($client->projects()->show($this->project)['id'], [
                 'title' => $title,
                 'description' => $body,
             ]);
