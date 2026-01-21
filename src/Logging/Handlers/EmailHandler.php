@@ -91,9 +91,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             $record = $this->processRecord($record);
         }
         $result = $this->handler->handle($record);
-        if ($result) {
-            $this->limitSentInterval?->recordSent();
-        }
+        $this->limitSentInterval?->recordSent();
         return $result;
     }
 
