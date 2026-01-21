@@ -90,8 +90,11 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         if (count($this->processors) > 0) {
             $record = $this->processRecord($record);
         }
-        $this->limitSentInterval?->recordSent();
-        return $this->handler->handle($record);
+        $result = $this->handler->handle($record);
+        if ($result) {
+            $this->limitSentInterval?->recordSent();
+        }
+        return $result;
     }
 
     public function handleBatch(array $records): void
