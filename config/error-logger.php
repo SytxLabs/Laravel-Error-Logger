@@ -51,6 +51,13 @@ return [
         ],
         'priority' => 'normal', // normal, high, low
         'drive' => null, // null, smtp, log
+        'max_subject_length' => 75,
+        'limit_sent' => [
+            'enabled' => false,
+            'interval_type' => \SytxLabs\ErrorLogger\Enums\EmailLimitSentInterval::DAY->value,
+            'interval' => 1,
+            'max_sent' => 500, // max emails to send in the interval
+        ],
         // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         // 'deduplicate' => [
         //     'enabled' => true,
