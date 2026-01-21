@@ -5,6 +5,7 @@ namespace SytxLabs\ErrorLogger\Enums;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use function Orchestra\Sidekick\enum_value;
 
 enum EmailLimitSentInterval: string
 {
@@ -17,7 +18,7 @@ enum EmailLimitSentInterval: string
 
     public static function active(): self
     {
-        return self::tryFrom(config('error-logger.email.limit_sent.interval_type', EmailLimitSentInterval::DAY->value)) ?? self::DAY;
+        return self::tryFrom(enum_value(config('error-logger.email.limit_sent.interval_type', EmailLimitSentInterval::DAY->value))) ?? self::DAY;
     }
 
     private function path(): string
@@ -29,6 +30,9 @@ enum EmailLimitSentInterval: string
     {
         $now ??= now();
         $interval = ((int) config('error-logger.email.limit_sent.interval', 1)) - 1;
+        if ($interval < 0) {
+            $interval = 0;
+        }
         return match ($this) {
             self::MINUTE => $now->startOfMinute()->subMinutes($interval),
             self::HOUR => $now->startOfHour()->subHours($interval),
@@ -77,11 +81,9 @@ enum EmailLimitSentInterval: string
         if (!$fs->exists($this->path())) {
             return collect();
         }
-        $contents = rescue(fn () => $fs->get($this->path()), '', false);
-        $timestamps = collect(explode(PHP_EOL, $contents))
+        $timestamps = collect(explode(PHP_EOL, rescue(fn () => $fs->get($this->path()), '', false)))
             ->filter(static fn ($line) => (trim($line ?? '') !== '') && is_numeric(trim($line)))
-            ->map(fn ($line) => (int) trim($line))
-            ->filter(fn ($timestamp) => $timestamp > ($this->subNow()->getTimestamp()));
+            ->map(fn ($line) => (int) trim($line))->filter(fn ($timestamp) => $timestamp > ($this->subNow()->getTimestamp()));
         $fs->put($this->path(), $timestamps->implode(PHP_EOL));
         return $timestamps;
     }
@@ -92,7 +94,12 @@ enum EmailLimitSentInterval: string
             return;
         }
         $fs = new Filesystem();
-        $timestamps = $this->collect();
+        $timestamps = collect();
+        if ($fs->exists($this->path())) {
+            $timestamps = collect(explode(PHP_EOL, rescue(fn () => $fs->get($this->path()), '', false)))
+                ->filter(static fn ($line) => (trim($line ?? '') !== '') && is_numeric(trim($line)))
+                ->map(fn ($line) => (int) trim($line))->filter(fn ($timestamp) => $timestamp > ($this->subNow()->getTimestamp()));
+        }
         $timestamps->push(now()->getTimestamp());
         $fs->put($this->path(), $timestamps->implode(PHP_EOL));
     }
