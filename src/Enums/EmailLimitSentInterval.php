@@ -2,11 +2,10 @@
 
 namespace SytxLabs\ErrorLogger\Enums;
 
+use BackedEnum;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-
-use function Orchestra\Sidekick\enum_value;
 
 enum EmailLimitSentInterval: string
 {
@@ -19,7 +18,11 @@ enum EmailLimitSentInterval: string
 
     public static function active(): self
     {
-        return self::tryFrom(enum_value(config('error-logger.email.limit_sent.interval_type', EmailLimitSentInterval::DAY->value))) ?? self::DAY;
+        $v = config('error-logger.email.limit_sent.interval_type', EmailLimitSentInterval::DAY->value);
+        if ($v instanceof BackedEnum) {
+            $v = $v->value;
+        }
+        return self::tryFrom($v) ?? self::DAY;
     }
 
     private function path(): string
