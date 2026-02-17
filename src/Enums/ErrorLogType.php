@@ -38,11 +38,7 @@ enum ErrorLogType: string
                 $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));
                 if (str_contains($name, '{timespan}')) {
                     $days = config('error-logger.daily_file.days', 7);
-                    $name = str_replace(
-                        '{timespan}',
-                        $days > 1 ? Carbon::now()->format('Y-m-d') . '_' . Carbon::now()->addDays($days - 1)->format('Y-m-d') : Carbon::now()->format('Y-m-d'),
-                        $name
-                    );
+                    $name = str_replace('{timespan}', $days > 1 ? Carbon::now()->format('Y-m-d') . '_' . Carbon::now()->addDays($days - 1)->format('Y-m-d') : Carbon::now()->format('Y-m-d'), $name);
                 }
                 return new InterfaceHandler((new StreamHandler($name, $level))->setFormatter($defaultFormat), $level);
             },
