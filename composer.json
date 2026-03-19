@@ -37,13 +37,13 @@
     "ext-simplexml": "*"
   },
   "require": {
-    "php": "^8.2|^8.3|^8.4",
+    "php": "^8.2|^8.3|^8.4|^8.5",
     "psr/log": "^3",
     "monolog/monolog": "^3",
-    "illuminate/log": "^10|^11|^12",
-    "illuminate/mail": "^10|^11|^12",
-    "illuminate/support": "^10|^11|^12",
-    "symfony/mailer": "^6|^7",
+    "illuminate/log": "^10|^11|^12|^13",
+    "illuminate/mail": "^10|^11|^12|^13",
+    "illuminate/support": "^10|^11|^12|^13",
+    "symfony/mailer": "^6|^7|^8",
     "guzzlehttp/guzzle": "^7.8",
     "m4tthumphrey/php-gitlab-api": "^11.14|^12.0.0",
     "symfony/http-client": "^7.0"
@@ -51,7 +51,7 @@
   "require-dev": {
     "orchestra/testbench": "^8.5|^9.1|^10",
     "portavice/laravel-pint-config": "^2.0",
-    "phpunit/phpunit": "^11.0"
+    "phpunit/phpunit": "^11.0|^12.0"
   },
   "config": {
     "sort-packages": true,
