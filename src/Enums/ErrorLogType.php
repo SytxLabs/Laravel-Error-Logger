@@ -32,7 +32,8 @@ enum ErrorLogType: string
 
     public function getHandler(string $subject, Level $level): HandlerInterface
     {
-        $defaultFormat = new LineFormatter(null, 'd.m.Y H:i:s T', true, false, true);
+        $format = config('error-logger.' . $this->value . '.formatter', null) ?? LineFormatter::class;
+        $defaultFormat = new $format(null, 'd.m.Y H:i:s T', true, false, true);
         $handler = match ($this) {
             self::DailyFile => static function () use ($level, $defaultFormat) {
                 $name = storage_path(config('error-logger.daily_file.path', 'logs/log_{timespan}.log'));

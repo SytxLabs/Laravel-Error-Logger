@@ -58,7 +58,8 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
             Level::Info => '#28a745',
             Level::Debug => '#6c757d',
         });
-        $this->setFormatter(new DiscordFormatter('Y-m-d H:i:s', $this->discordWebhook));
+        $formatter = config('error-logger.discord.formatter', null) ?? DiscordFormatter::class;
+        $this->setFormatter(new $formatter('Y-m-d H:i:s', $this->discordWebhook));
         $this->getFormatter()->format($record);
         if (!$discordWebhook->sendEmbed($record->datetime->format('c'))) {
             throw new UnexpectedValueException(sprintf('The discord webhook "%s" could not be opened: '.$this->errorMessage, $this->url) . Utils::getRecordMessageForException($record));

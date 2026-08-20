@@ -9,6 +9,7 @@ use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
+use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
 use SytxLabs\ErrorLogger\Support\WhatsAppCallMeBot;
 use UnexpectedValueException;
 
@@ -52,8 +53,9 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
         }
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
-        $message = config('app.name', 'Laravel') . ' Log' . PHP_EOL . $record->level->name . ' Log' . PHP_EOL
-            . PHP_EOL . ($record->formatted ?? $record->context) . PHP_EOL . PHP_EOL . $record->datetime->format('Y-m-d H:i:s');
+        $formatter = config('error-logger.telegram.formatter', null) ?? IssueFormatter::class;
+        $this->setFormatter(new $formatter('d.m.Y H:i:s T'));
+        $message = config('app.name', 'Laravel') . ' Log' . PHP_EOL . PHP_EOL . $this->getFormatter()->format($record);
         $errors = [];
         foreach ($this->whatsAppCallMeBots as $whatsappHandler) {
             if (!$whatsappHandler->send($message)) {

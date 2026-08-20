@@ -20,6 +20,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
 
     'daily_file' => [
@@ -32,6 +33,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'email' => [
         'default_subject' => 'Log',
@@ -65,6 +67,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'discord' => [
         'webhook_url' => '',
@@ -77,6 +80,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'whatsapp' => [
         [
@@ -90,6 +94,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'github' => [
         'url' => '', // https://gitlab.com/username/project
@@ -101,6 +106,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'gitlab' => [
         'url' => '', // https://gitlab.com/username/project
@@ -112,6 +118,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'telegram' => [
         'token' => '', // Bot Token
@@ -123,6 +130,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'webhook' => [
         'url' => '',
@@ -146,6 +154,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
     'stderr' => [
         // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
@@ -155,5 +164,6 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // 'formatter' => null,
     ],
 ];

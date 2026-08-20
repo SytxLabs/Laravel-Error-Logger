@@ -54,7 +54,8 @@ class GithubProcessingHandler extends AbstractProcessingHandler
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
         $github = $this->github = new Github($this->url, $this->apiKey);
-        $this->setFormatter(new IssueFormatter('d.m.Y H:i:s T'));
+        $formatter = config('error-logger.github.formatter', null) ?? IssueFormatter::class;
+        $this->setFormatter(new $formatter('d.m.Y H:i:s T'));
         if (!$github->openIssue($record->message . ' - ' . $record->datetime->format('d.m.Y H:i:s T'), $this->getFormatter()->format($record))) {
             throw new UnexpectedValueException(sprintf('The github issue "%s" could not be opened: '.$this->errorMessage, $this->url) . Utils::getRecordMessageForException($record));
         }
