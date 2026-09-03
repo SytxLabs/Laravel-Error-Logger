@@ -3,6 +3,7 @@
 namespace SytxLabs\ErrorLogger\Enums;
 
 use BackedEnum;
+use Carbon\CarbonInterface;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -30,15 +31,13 @@ enum EmailLimitSentInterval: string
         return storage_path('logs/error-logger-email-limit-sent.lock');
     }
 
-    /** @noinspection MissingParameterTypeDeclarationInspection */
-    public function subNow($now = null): Carbon
+    public function subNow($now = null): CarbonInterface
     {
         $now ??= now();
         $interval = ((int) config('error-logger.email.limit_sent.interval', 1)) - 1;
         if ($interval < 0) {
             $interval = 0;
         }
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return match ($this) {
             self::MINUTE => $now->startOfMinute()->subMinutes($interval),
             self::HOUR => $now->startOfHour()->subHours($interval),
