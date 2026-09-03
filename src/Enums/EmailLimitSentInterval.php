@@ -5,7 +5,6 @@ namespace SytxLabs\ErrorLogger\Enums;
 use BackedEnum;
 use Carbon\CarbonInterface;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 enum EmailLimitSentInterval: string
