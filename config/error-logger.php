@@ -20,7 +20,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \Monolog\Formatter\LineFormatter)
     ],
 
     'daily_file' => [
@@ -33,7 +33,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \Monolog\Formatter\LineFormatter)
     ],
     'email' => [
         'default_subject' => 'Log',
@@ -67,7 +67,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \Monolog\Formatter\HtmlFormatter)
     ],
     'discord' => [
         'webhook_url' => '',
@@ -80,7 +80,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \SytxLabs\ErrorLogger\Logging\Handlers\Formatter\DiscordFormatter)
     ],
     'whatsapp' => [
         [
@@ -94,7 +94,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter)
     ],
     'github' => [
         'url' => '', // https://gitlab.com/username/project
@@ -106,7 +106,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter)
     ],
     'gitlab' => [
         'url' => '', // https://gitlab.com/username/project
@@ -118,7 +118,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter)
     ],
     'telegram' => [
         'token' => '', // Bot Token
@@ -130,7 +130,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter)
     ],
     'webhook' => [
         'url' => '',
@@ -145,6 +145,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
+        // no 'formatter' here: the payload is built from the 'format' option above
     ],
     'stdout' => [
         // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
@@ -154,7 +155,7 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \Monolog\Formatter\LineFormatter)
     ],
     'stderr' => [
         // 'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
@@ -164,6 +165,6 @@ return [
         //     'level' => 'debug', // 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
         //     'path' => storage_path('logs/deduplicate.log'), // path to store deduplicate log can be null for no log
         // ],
-        // 'formatter' => null,
+        // 'formatter' => null, // Monolog formatter, see README (default: \Monolog\Formatter\LineFormatter)
     ],
 ];

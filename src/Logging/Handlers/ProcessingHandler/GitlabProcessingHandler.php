@@ -9,6 +9,7 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
+use SytxLabs\ErrorLogger\Support\FormatterResolver;
 use SytxLabs\ErrorLogger\Support\GitLab;
 use UnexpectedValueException;
 
@@ -54,8 +55,7 @@ class GitlabProcessingHandler extends AbstractProcessingHandler
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
         $gitLab = $this->gitLab = new GitLab($this->url, $this->apiKey);
-        $formatter = config('error-logger.gitlab.formatter', null) ?? IssueFormatter::class;
-        $this->setFormatter(new $formatter('d.m.Y H:i:s T'));
+        $this->setFormatter(FormatterResolver::resolve(config('error-logger.gitlab.formatter'), static fn () => new IssueFormatter('d.m.Y H:i:s T')));
         if (!$gitLab->openIssue($record->message . ' - ' . $record->datetime->format('d.m.Y H:i:s T'), $this->getFormatter()->format($record))) {
             throw new UnexpectedValueException(sprintf('The gitlab issue "%s" could not be opened: '.$this->errorMessage, $this->url) . Utils::getRecordMessageForException($record));
         }
