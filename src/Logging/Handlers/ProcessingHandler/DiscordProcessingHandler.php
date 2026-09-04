@@ -10,6 +10,7 @@ use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\DiscordFormatter;
 use SytxLabs\ErrorLogger\Support\DiscordWebhook;
+use SytxLabs\ErrorLogger\Support\FormatterResolver;
 use UnexpectedValueException;
 
 class DiscordProcessingHandler extends AbstractProcessingHandler
@@ -58,8 +59,9 @@ class DiscordProcessingHandler extends AbstractProcessingHandler
             Level::Info => '#28a745',
             Level::Debug => '#6c757d',
         });
-        $this->setFormatter(new DiscordFormatter('Y-m-d H:i:s', $this->discordWebhook));
-        $this->getFormatter()->format($record);
+        $this->discordWebhook->setTitle($record->level->name . ' Log');
+        $this->setFormatter(FormatterResolver::resolve(config('error-logger.discord.formatter'), fn () => new DiscordFormatter('Y-m-d H:i:s', $this->discordWebhook)));
+        $this->discordWebhook->setTxt($this->getFormatter()->format($record));
         if (!$discordWebhook->sendEmbed($record->datetime->format('c'))) {
             throw new UnexpectedValueException(sprintf('The discord webhook "%s" could not be opened: '.$this->errorMessage, $this->url) . Utils::getRecordMessageForException($record));
         }

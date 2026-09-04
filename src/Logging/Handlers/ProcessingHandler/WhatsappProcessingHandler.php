@@ -9,6 +9,8 @@ use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
+use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
+use SytxLabs\ErrorLogger\Support\FormatterResolver;
 use SytxLabs\ErrorLogger\Support\WhatsAppCallMeBot;
 use UnexpectedValueException;
 
@@ -22,8 +24,10 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
         $this->whatsAppCallMeBots = new Collection();
         parent::__construct($level, $bubble);
         $config = config('error-logger.whatsapp', []);
-        unset($config['level']);
-        foreach ($config as $whatsApp) {
+        foreach ($config as $key => $whatsApp) {
+            if (!is_array($whatsApp) || in_array($key, ['level', 'deduplicate', 'formatter'], true)) {
+                continue;
+            }
             $phoneNumber = $whatsApp['phone_number'] ?? '';
             $apiToken = $whatsApp['api_token'] ?? '';
             if (trim($phoneNumber) !== '' && trim($apiToken) !== '') {
@@ -52,8 +56,9 @@ class WhatsappProcessingHandler extends AbstractProcessingHandler
         }
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
+        $this->setFormatter(FormatterResolver::resolve(config('error-logger.whatsapp.formatter'), static fn () => new IssueFormatter('d.m.Y H:i:s T')));
         $message = config('app.name', 'Laravel') . ' Log' . PHP_EOL . $record->level->name . ' Log' . PHP_EOL
-            . PHP_EOL . ($record->formatted ?? $record->context) . PHP_EOL . PHP_EOL . $record->datetime->format('Y-m-d H:i:s');
+            . PHP_EOL . $this->getFormatter()->format($record) . PHP_EOL . PHP_EOL . $record->datetime->format('Y-m-d H:i:s');
         $errors = [];
         foreach ($this->whatsAppCallMeBots as $whatsappHandler) {
             if (!$whatsappHandler->send($message)) {

@@ -3,9 +3,9 @@
 namespace SytxLabs\ErrorLogger\Logging\Handlers;
 
 use DateTimeImmutable;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Monolog\Handler\FingersCrossedHandler;
@@ -21,6 +21,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use SytxLabs\ErrorLogger\Enums\EmailLimitSentInterval;
 use SytxLabs\ErrorLogger\Enums\ErrorLogEmailPriority;
+use SytxLabs\ErrorLogger\Support\FormatterResolver;
 
 class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
 {
@@ -49,7 +50,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
                 $email = $this->setReplyTo($email)->subject('Error Logger Email Limit Exceeded')->priority(ErrorLogEmailPriority::High->getPriority());
                 $driver = config('error-logger.email.drive') ?? config('mail.default', 'log');
                 $mailHandler = new SymfonyMailerHandler(Mail::driver($driver)->getSymfonyTransport(), $email, Level::Critical);
-                $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
+                $mailHandler->setFormatter($this->formatter());
                 $handler = new WhatFailureGroupHandler([new FingersCrossedHandler($mailHandler, new ErrorLevelActivationStrategy(Level::Critical))]);
                 $handler->handle(new LogRecord(
                     datetime: new DateTimeImmutable(),
@@ -76,7 +77,7 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
             return;
         }
         $mailHandler = new SymfonyMailerHandler(Mail::driver($driver)->getSymfonyTransport(), $email, $level);
-        $mailHandler->setFormatter(new HtmlFormatter('Y-m-d H:i:s'));
+        $mailHandler->setFormatter($this->formatter());
         $this->handler = new WhatFailureGroupHandler([new FingersCrossedHandler($mailHandler, new ErrorLevelActivationStrategy($level))]);
     }
 
@@ -109,11 +110,16 @@ class EmailHandler implements HandlerInterface, ProcessableHandlerInterface
         $this->handler->close();
     }
 
+    private function formatter(): FormatterInterface
+    {
+        return FormatterResolver::resolve(config('error-logger.email.formatter'), static fn () => new HtmlFormatter('Y-m-d H:i:s'));
+    }
+
     private function setRecipient(Email $email): ?Email
     {
         $recipient = config('error-logger.email.to', []);
         if (is_string($recipient) && !empty($recipient)) {
-            $recipient = array_map('trim', preg_split('/[;,]/', $recipient) ?? Arr::wrap($recipient));
+            $recipient = array_map('trim', preg_split('/[;,]/', $recipient) ?? [$recipient]);
         }
         if (empty($recipient) || count($recipient) < 1 || empty($recipient[0] ?? null)) {
             return null;

@@ -9,6 +9,7 @@ use Monolog\Level;
 use Monolog\LogRecord;
 use Monolog\Utils;
 use SytxLabs\ErrorLogger\Logging\Handlers\Formatter\IssueFormatter;
+use SytxLabs\ErrorLogger\Support\FormatterResolver;
 use SytxLabs\ErrorLogger\Support\Github;
 use UnexpectedValueException;
 
@@ -54,7 +55,7 @@ class GithubProcessingHandler extends AbstractProcessingHandler
         $this->errorMessage = null;
         set_error_handler([$this, 'customErrorHandler']);
         $github = $this->github = new Github($this->url, $this->apiKey);
-        $this->setFormatter(new IssueFormatter('d.m.Y H:i:s T'));
+        $this->setFormatter(FormatterResolver::resolve(config('error-logger.github.formatter'), static fn () => new IssueFormatter('d.m.Y H:i:s T')));
         if (!$github->openIssue($record->message . ' - ' . $record->datetime->format('d.m.Y H:i:s T'), $this->getFormatter()->format($record))) {
             throw new UnexpectedValueException(sprintf('The github issue "%s" could not be opened: '.$this->errorMessage, $this->url) . Utils::getRecordMessageForException($record));
         }

@@ -14,7 +14,7 @@ class ErrorLoggerTest extends TestCase
         return [ErrorLoggerServiceProvider::class];
     }
 
-    public function test_it_logs_working_debug()
+    public function test_it_logs_working_debug(): void
     {
         $logger = new LogManager($this->app);
 
@@ -22,7 +22,7 @@ class ErrorLoggerTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_it_logs_working_error()
+    public function test_it_logs_working_error(): void
     {
         $logger = new LogManager($this->app);
 
