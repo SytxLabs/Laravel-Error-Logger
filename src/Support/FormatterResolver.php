@@ -26,22 +26,18 @@ class FormatterResolver
             }
             try {
                 $reflection = new ReflectionClass($formatter);
-                $constructor = $reflection->getConstructor();
-                if (!$reflection->isInstantiable() || ($constructor?->getNumberOfRequiredParameters() ?? 0) > 0) {
-                    return $default();
+                if ($reflection->isInstantiable() && ($reflection->getConstructor()?->getNumberOfRequiredParameters() ?? 0) < 1) {
+                    return new $formatter();
                 }
-                return new $formatter();
             } catch (Throwable) {
             }
-            return $default();
         }
-        if (!is_string($formatter) && is_callable($formatter)) {
-            try {
+        try {
+            if (is_callable($formatter)) {
                 $resolved = $formatter();
-            } catch (Throwable) {
-                return $default();
+                return $resolved instanceof FormatterInterface ? $resolved : $default();
             }
-            return $resolved instanceof FormatterInterface ? $resolved : $default();
+        } catch (Throwable) {
         }
         return $default();
     }
